@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { 
   Fuel, TrendingUp, Gauge, Shield, ChevronRight, 
-  ArrowRight, Star, Sun, Moon, CheckCircle2, LogIn, Server, Lock, Globe,
-  Map, Zap
+  ArrowRight, Star, Sun, Moon, LogIn, Server, Lock, Globe,
+  Map, Zap, BarChart3, PieChart
 } from 'lucide-react';
 import { ViewState } from '../types';
 
@@ -96,7 +96,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
       </nav>
       
       <main className="relative z-10 pt-40 pb-20 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center min-h-[70vh]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[70vh]">
           
           <div className="reveal-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-100">
             <h1 className="text-6xl lg:text-8xl leading-[0.9] text-gray-900 dark:text-white mb-8 tracking-tighter">
@@ -131,7 +131,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
               </div>
             </div>
             
-            {/* Trust Badges - Styled as System Status Indicators */}
+            {/* Trust Badges */}
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono font-medium">
                <div className="px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/50 flex items-center gap-2">
                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
@@ -146,77 +146,92 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
             </div>
           </div>
 
-          {/* Hero Visual - Phone Mockup (Kept as is) */}
-          <div className="relative perspective-1000 h-[600px] flex items-center justify-center reveal-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-300">
-             <div className="absolute inset-0 bg-brand-yellow dark:bg-neural-cyan/20 blur-[100px] rounded-full pointer-events-none mix-blend-multiply dark:mix-blend-normal"></div>
-             <div className="relative w-[300px] md:w-[340px] h-[600px] bg-black rounded-[3rem] p-3 shadow-2xl border-4 border-gray-100 dark:border-gray-800 rotate-y-[-10deg] hover:rotate-y-0 transition-transform duration-700 ease-out animate-float">
-                <div className="w-full h-full bg-white dark:bg-black rounded-[2.5rem] overflow-hidden relative border border-gray-800">
-                  <div className="absolute top-0 left-0 right-0 h-14 z-20 flex justify-between px-6 pt-5 text-[10px] font-medium text-gray-500">
-                    <span>9:41</span>
-                    <div className="flex gap-1 items-center">
-                      <div className="w-3 h-3 rounded-full bg-black dark:bg-white/20"></div>
-                      <div className="w-4 h-2.5 rounded-sm border border-gray-300 dark:border-gray-700"></div>
-                    </div>
-                  </div>
-                  <div className="pt-14 px-4 h-full bg-gray-50 dark:bg-[#0a0a0a]">
-                    <div className="flex justify-between items-center mb-6">
-                      <div>
-                        <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">Total Savings</div>
-                        <div className="text-2xl font-bold font-serif dark:font-mono text-gray-900 dark:text-white">$1,240.50</div>
+          {/* New Hero Visual - Dashboard + Mobile Composition */}
+          <div className="relative perspective-1000 h-[600px] w-full flex items-center justify-center reveal-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-300 pointer-events-none lg:pointer-events-auto">
+             <div className="absolute inset-0 bg-brand-orange/5 dark:bg-neural-cyan/5 blur-[100px] rounded-full pointer-events-none"></div>
+             
+             {/* Laptop Screen Mockup */}
+             <div className="relative w-full max-w-[600px] bg-white dark:bg-[#0a0a0a] rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 p-2 transform rotate-y-[-5deg] rotate-x-[5deg] transition-transform duration-700 hover:rotate-y-0 hover:rotate-x-0">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gray-300 dark:bg-gray-700 rounded-b-md"></div>
+                
+                {/* Screen Content */}
+                <div className="w-full aspect-[16/10] bg-gray-50 dark:bg-[#111] rounded-lg overflow-hidden flex flex-col relative">
+                   {/* Header */}
+                   <div className="h-8 border-b border-gray-200 dark:border-gray-800 flex items-center px-4 gap-2">
+                      <div className="flex gap-1.5">
+                         <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                         <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                         <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
                       </div>
-                      <div className="w-10 h-10 rounded-full bg-brand-orange dark:bg-neural-cyan/20 flex items-center justify-center text-white dark:text-neural-cyan">
-                        <Fuel size={18} />
+                   </div>
+                   
+                   {/* Dashboard Body */}
+                   <div className="flex-1 p-4 grid grid-cols-3 gap-4">
+                      {/* Sidebar */}
+                      <div className="col-span-1 bg-white dark:bg-black/40 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-white/5">
+                         <div className="h-2 w-1/2 bg-gray-200 dark:bg-gray-800 rounded mb-4"></div>
+                         <div className="h-8 w-full bg-brand-orange/10 dark:bg-neural-cyan/10 rounded-md"></div>
+                         <div className="h-8 w-full bg-transparent rounded-md"></div>
+                         <div className="h-8 w-full bg-transparent rounded-md"></div>
                       </div>
-                    </div>
-                    <div className="h-40 w-full bg-white dark:bg-white/5 rounded-2xl mb-6 p-4 shadow-sm border border-gray-100 dark:border-white/5 relative overflow-hidden group">
-                       <img 
-                         src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" 
-                         className="absolute inset-0 w-full h-full object-cover opacity-20 dark:opacity-40 mix-blend-overlay"
-                         alt="Chart"
-                       />
-                       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between h-20 gap-2">
-                          {[40, 60, 35, 80, 55, 90, 70].map((h, i) => (
-                            <div key={i} className="w-full bg-brand-orange dark:bg-neural-cyan rounded-t-sm opacity-80" style={{ height: `${h}%` }}></div>
-                          ))}
-                       </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Recent Trips</div>
-                      {[
-                        { dest: "San Francisco", dist: "42.5 mi", cost: "$12.40" },
-                        { dest: "Palo Alto HQ", dist: "18.2 mi", cost: "$5.80" },
-                        { dest: "Airport Run", dist: "32.0 mi", cost: "$9.15" }
-                      ].map((trip, i) => (
-                        <div key={i} className="bg-white dark:bg-white/5 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 flex justify-between items-center">
-                           <div className="flex items-center gap-3">
-                             <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-500">
-                               <Map size={14} />
-                             </div>
-                             <div>
-                               <div className="text-sm font-bold text-gray-900 dark:text-white">{trip.dest}</div>
-                               <div className="text-[10px] text-gray-500">{trip.dist}</div>
-                             </div>
-                           </div>
-                           <div className="text-xs font-bold font-mono text-gray-900 dark:text-white">{trip.cost}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="absolute bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-neural-cyan rounded-full shadow-lg flex items-center justify-center text-white dark:text-black">
-                      <Zap size={20} />
-                    </div>
-                  </div>
+                      
+                      {/* Main */}
+                      <div className="col-span-2 space-y-4">
+                         {/* Stats Row */}
+                         <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-white dark:bg-black/40 p-3 rounded-lg border border-gray-100 dark:border-white/5">
+                               <div className="text-[10px] text-gray-400 mb-1">Total Fuel</div>
+                               <div className="h-6 w-16 bg-brand-orange/20 dark:bg-neural-cyan/20 rounded"></div>
+                            </div>
+                            <div className="bg-white dark:bg-black/40 p-3 rounded-lg border border-gray-100 dark:border-white/5">
+                               <div className="text-[10px] text-gray-400 mb-1">Efficiency</div>
+                               <div className="h-6 w-16 bg-green-500/20 rounded"></div>
+                            </div>
+                         </div>
+                         
+                         {/* Chart Area */}
+                         <div className="bg-white dark:bg-black/40 p-3 rounded-lg border border-gray-100 dark:border-white/5 h-32 relative overflow-hidden flex items-end justify-between px-4 pb-2">
+                            <div className="w-6 h-12 bg-gray-200 dark:bg-gray-800 rounded-t-sm"></div>
+                            <div className="w-6 h-20 bg-brand-orange dark:bg-neural-cyan rounded-t-sm opacity-80"></div>
+                            <div className="w-6 h-16 bg-gray-200 dark:bg-gray-800 rounded-t-sm"></div>
+                            <div className="w-6 h-24 bg-brand-orange dark:bg-neural-cyan rounded-t-sm opacity-80"></div>
+                            <div className="w-6 h-14 bg-gray-200 dark:bg-gray-800 rounded-t-sm"></div>
+                         </div>
+                      </div>
+                   </div>
                 </div>
              </div>
+
+             {/* Mobile Phone Overlay */}
+             <div className="absolute -bottom-10 -right-4 w-[160px] bg-black rounded-[2rem] p-2 shadow-2xl border border-gray-800 transform rotate-[-5deg] hover:rotate-0 transition-transform duration-500">
+                <div className="bg-[#111] rounded-[1.7rem] overflow-hidden aspect-[9/19] relative">
+                   {/* Mobile Header */}
+                   <div className="bg-brand-orange dark:bg-neural-cyan h-24 p-4 flex flex-col justify-end">
+                      <div className="w-8 h-8 rounded-full bg-white/20 mb-2"></div>
+                      <div className="h-2 w-20 bg-white/40 rounded"></div>
+                   </div>
+                   {/* Mobile List */}
+                   <div className="p-3 space-y-2">
+                      <div className="h-12 bg-white/10 rounded-xl w-full"></div>
+                      <div className="h-12 bg-white/10 rounded-xl w-full"></div>
+                      <div className="h-12 bg-white/10 rounded-xl w-full"></div>
+                   </div>
+                   <div className="absolute bottom-4 right-4 w-10 h-10 bg-brand-orange dark:bg-neural-cyan rounded-full shadow-lg flex items-center justify-center text-white">
+                      <Plus size={16} strokeWidth={3} className="text-white dark:text-black"/>
+                   </div>
+                </div>
+             </div>
+
           </div>
 
         </div>
 
-        {/* Features Grid - Enhanced */}
+        {/* Features Grid - Enhanced Visibility in Light Mode */}
         <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
            {features.map((feature, i) => (
              <div 
                key={i} 
-               className={`reveal-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out p-8 rounded-3xl border border-gray-100 dark:border-white/10 hover:shadow-card dark:hover:shadow-neon-cyan/20 relative overflow-hidden group bg-white dark:bg-white/5`}
+               className={`glass-panel reveal-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out p-8 rounded-3xl bg-white dark:bg-white/5 relative overflow-hidden group`}
                style={{ transitionDelay: `${i * 100}ms` }}
              >
                 {/* Background Decoration - Glow Behind Icon */}
@@ -261,3 +276,21 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
     </div>
   );
 };
+function Plus({ size, className, strokeWidth }: { size: number, className?: string, strokeWidth?: number }) {
+  return (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth={strokeWidth || 2} 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </svg>
+  )
+}

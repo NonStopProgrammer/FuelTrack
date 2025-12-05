@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FuelLog, Vehicle } from '../types';
 import { supabase } from '../lib/supabase';
-import { Plus, Calendar, Gauge, Fuel, DollarSign, MapPin, ListFilter } from 'lucide-react';
+import { Plus, Calendar, Gauge, Fuel, DollarSign, MapPin, X, IndianRupee } from 'lucide-react';
 
 interface FuelLogManagerProps {
   logs: FuelLog[];
@@ -110,11 +110,12 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
               {logs.map((log) => (
                 <tr key={log.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-700 dark:text-gray-300">{new Date(log.ts).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 font-medium">{log.vehicle_name}</td>
+                  {/* Fixed text color to ensure visibility in all themes */}
+                  <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{log.vehicle_name}</td>
                   <td className="px-6 py-4 font-mono text-gray-500 dark:text-gray-400">{log.odometer.toLocaleString()}</td>
                   <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{log.litres} L</td>
-                  <td className="px-6 py-4 text-gray-700 dark:text-gray-300">${log.price_per_l}</td>
-                  <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">${log.total_cost}</td>
+                  <td className="px-6 py-4 text-gray-700 dark:text-gray-300">₹{log.price_per_l}</td>
+                  <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">₹{log.total_cost}</td>
                 </tr>
               ))}
               {logs.length === 0 && (
@@ -127,12 +128,16 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
         </div>
       </div>
 
-      {/* Add Log Modal */}
+      {/* Add Log Modal - Perfectly Centered */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30 dark:bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl p-8 border border-gray-100 dark:border-glass-border animate-fade-in-up">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white font-serif dark:font-mono">Log Fuel Entry</h2>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm transition-opacity" onClick={() => setShowModal(false)}></div>
+          
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl p-8 border border-gray-100 dark:border-glass-border animate-fade-in-up max-h-[85vh] overflow-y-auto flex flex-col my-auto">
+            <div className="flex justify-between items-center mb-6 shrink-0">
+               <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-serif dark:font-mono">Log Fuel Entry</h2>
+               <button onClick={() => setShowModal(false)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"><X size={20} className="text-gray-900 dark:text-white"/></button>
+            </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
                {/* Vehicle Select */}
@@ -141,7 +146,7 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
                   <select 
                     value={formData.vehicle_id} 
                     onChange={e => setFormData({...formData, vehicle_id: e.target.value})}
-                    className="w-full p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl outline-none text-gray-900 dark:text-white"
+                    className="w-full p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl outline-none text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-orange"
                   >
                     {vehicles.map(v => <option key={v.id} value={v.id}>{v.name} ({v.model})</option>)}
                   </select>
@@ -173,7 +178,7 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
                    </div>
                  </div>
                  <div>
-                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Price / L</label>
+                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Price / L (₹)</label>
                    <div className="relative">
                       <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
                       <input required type="number" step="0.01" value={formData.price_per_l || ''} onChange={e => handleCalc('price_per_l', parseFloat(e.target.value))} className="w-full pl-10 p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-orange dark:focus:ring-neural-cyan text-gray-900 dark:text-white" placeholder="0.00"/>
@@ -182,9 +187,10 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
                </div>
 
                <div>
-                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Total Cost</label>
+                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Total Cost (₹)</label>
                    <div className="relative">
-                      <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                      {/* Changed to Rupee Icon if available, or keep Dollar as generic money icon but styled appropriately */}
+                      <IndianRupee size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
                       <input required type="number" step="0.01" value={formData.total_cost || ''} onChange={e => setFormData({...formData, total_cost: parseFloat(e.target.value)})} className="w-full pl-10 p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-orange dark:focus:ring-neural-cyan text-gray-900 dark:text-white font-bold"/>
                    </div>
                </div>

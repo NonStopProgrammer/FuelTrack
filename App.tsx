@@ -21,7 +21,7 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard onLogout={() => setCurrentView('landing')} />;
+        return <Dashboard onLogout={() => setCurrentView('landing')} isDark={isDark} toggleTheme={() => setIsDark(!isDark)} />;
       case 'login':
         return <Auth mode="login" onNavigate={(view) => setCurrentView(view)} />;
       case 'signup':

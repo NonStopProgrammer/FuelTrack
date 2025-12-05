@@ -21,11 +21,11 @@
             },
             colors: {
               brand: {
-                orange: '#F97316', // More vibrant, standard orange
+                orange: '#F97316', 
                 darkOrange: '#EA580C',
-                light: '#FFFFFF', // PURE WHITE for the Cognitive theme base
+                light: '#FFFFFF', 
                 dark: '#050505',
-                yellow: '#FFF7ED', // Very pale orange/yellow for subtle backgrounds
+                yellow: '#FFF7ED', 
                 gray: '#F9FAFB',
               },
               obsidian: '#050505',
@@ -35,10 +35,10 @@
             },
             boxShadow: {
               'soft': '0 20px 40px -15px rgba(0, 0, 0, 0.05)',
-              'card': '0 2px 4px rgba(0,0,0,0.02), 0 10px 20px rgba(0,0,0,0.04)',
-              'glow': '0 0 30px -5px rgba(249, 115, 22, 0.3)', // Orange glow
-              'orange-glow': '0 0 40px -5px rgba(249, 115, 22, 0.5)', // Stronger orange glow for icons
-              'cyan-glow': '0 0 40px -5px rgba(34, 211, 238, 0.4)', // Cyan glow for dark mode
+              'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05)',
+              'glow': '0 0 30px -5px rgba(249, 115, 22, 0.3)',
+              'orange-glow': '0 0 40px -5px rgba(249, 115, 22, 0.5)',
+              'cyan-glow': '0 0 40px -5px rgba(34, 211, 238, 0.4)',
               'neon-cyan': '0 0 30px -5px rgba(34, 211, 238, 0.4)',
             },
             animation: {
@@ -59,7 +59,6 @@
             backgroundImage: {
               'noise': "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\" opacity=\"0.05\"/%3E%3C/svg%3E')",
               'mesh-gradient': 'radial-gradient(at 0% 0%, rgba(34, 211, 238, 0.15) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.15) 0px, transparent 50%)',
-              // Subtle top-right gradient only, keeping the rest white
               'mesh-gradient-light': 'radial-gradient(circle at 100% 0%, rgba(255, 237, 213, 0.6) 0%, rgba(255, 255, 255, 0) 40%)', 
             }
           }
@@ -78,18 +77,12 @@
         -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
       }
-      /* Clean white cards for light mode, no heavy blur/glass */
+      /* Enhanced Visibility for Light Mode */
       .light .glass-panel {
         background: #FFFFFF;
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
       }
-      
-      .transform-style-3d {
-        transform-style: preserve-3d;
-      }
-      
-      /* Utilities for scroll reveal */
       .reveal-on-scroll {
         will-change: transform, opacity;
       }
@@ -97,11 +90,17 @@
   <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react": "https://esm.sh/react@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.7",
+    "chart.js": "https://esm.sh/chart.js@4.4.1",
+    "chart.js/auto": "https://esm.sh/chart.js@4.4.1/auto",
+    "react-chartjs-2": "https://esm.sh/react-chartjs-2@5.2.0?deps=react@18.2.0,chart.js@4.4.1",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+    "chart.js/": "https://aistudiocdn.com/chart.js@^4.5.1/"
   }
 }
 </script>

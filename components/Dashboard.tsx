@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, Car, History, Settings, LogOut, 
+  LayoutDashboard, Car, History, Settings as SettingsIcon, LogOut, 
   Plus, Fuel, Calendar, DollarSign, Gauge, ArrowUpRight, ChevronRight,
-  TrendingDown, TrendingUp
+  TrendingDown, TrendingUp, BarChart3, IndianRupee, Wallet
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Vehicle, FuelLog, DashboardStats } from '../types';
 import { VehicleManager } from './VehicleManager';
 import { FuelLogManager } from './FuelLogManager';
+import { Settings } from './Settings';
+import { Analytics } from './Analytics';
 
 interface DashboardProps {
   onLogout: () => void;
+  isDark: boolean;
+  toggleTheme: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTheme }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [user, setUser] = useState<any>(null);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -22,30 +26,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [loading, setLoading] = useState(true);
 
   // Use the email used in auth as a session identifier for this simplified demo
-  // In a real app, we'd use supabase auth context, but we are using our custom app_users table
   const [userEmail, setUserEmail] = useState<string>(''); 
 
   useEffect(() => {
-    // Hacky way to get the last logged in email from the simple Auth component flow
-    // Ideally Auth passes the user object up, but we'll fetch based on a persistent store or prompt
-    // For this demo, let's assume the user just logged in and we have access to context or we ask Auth to pass it.
-    // Since Auth didn't pass it in previous steps, we will prompt or look for a stored item.
-    // *Correction*: I will fetch the most recent created user for demo purposes if no prop is passed, 
-    // BUT getting it from the Auth component is better. 
-    // Let's implement a quick session storage for the 'demo' user email.
-    
-    // NOTE: In a real Supabase Auth impl, supabase.auth.getUser() is used.
-    // Here we are using a custom table. I will assume the user entered 'pilot@example.com' or check local storage.
-    // For now, I will fetch the first user found or use a hardcoded fallback for the "replica" requirement if not passed.
-    // Actually, let's just fetch the last updated user to simulate "Current Session".
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
     setLoading(true);
     try {
-      // For this demo, we'll fetch the most recently updated user to simulate the "logged in" user
-      // since we aren't using Supabase Auth (GoTrue) but a custom table.
       const { data: users, error } = await supabase
         .from('app_users')
         .select('*')
@@ -88,48 +77,58 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }));
     setLogs(fetchedLogs);
 
-    // Calculate Stats
     calculateStats(fetchedLogs);
   };
 
   const calculateStats = (currentLogs: FuelLog[]) => {
-    if (currentLogs.length === 0) {
-      setStats({ avgMpg: 0, totalCost: 0, totalDistance: 0, totalFuel: 0 });
+    if (currentLogs.length < 2) {
+      // Not enough data to calculate efficiency properly based on "distance traveled between fills"
+      const totalCost = currentLogs.reduce((acc, log) => acc + log.total_cost, 0);
+      const totalFuel = currentLogs.reduce((acc, log) => acc + log.litres, 0);
+      setStats({ 
+        avgMpg: 0, 
+        totalCost: parseFloat(totalCost.toFixed(2)), 
+        totalDistance: 0, 
+        totalFuel: parseFloat(totalFuel.toFixed(1)) 
+      });
       return;
     }
 
     const totalCost = currentLogs.reduce((acc, log) => acc + log.total_cost, 0);
-    const totalFuel = currentLogs.reduce((acc, log) => acc + log.litres, 0);
+    // Sort ascending for math
+    const sorted = [...currentLogs].sort((a,b) => a.odometer - b.odometer);
     
-    // Distance Estimate: simplified as Max Odo - Min Odo per vehicle summed
-    // This is rough. A better way is sum of deltas between logs.
-    // Let's just use sum of current_odometer of all vehicles for "Total Fleet Mileage"
-    // Wait, logs have odometers. 
-    // Let's just sum the cost and fuel for now.
-    
-    // MPG Calculation (Miles per Gallon equivalent, but we have Liters/KM usually in this schema?
-    // The Schema has 'odometer' (numeric) and 'litres'.
-    // If odometer is KM, then it's KM/L. If Miles, MPG. 
-    // Let's assume KM and Liters for the schema (litres field).
-    // Efficiency = Distance / Fuel.
-    
-    // We need pairs of logs to calculate distance traveled between fills.
-    // For this simple dashboard, let's just do Total Odometer / Total Fuel (Very rough lifetime avg)
-    // or just display totals.
-    
-    const efficiency = totalFuel > 0 ? (currentLogs[0].odometer / totalFuel) : 0; // Very rough approximation for demo
+    // Logic: Distance = Last Odometer - First Odometer
+    // Fuel Consumed = Sum of all liters *except* the very first fill (which establishes the baseline).
+    // This assumes the user refills roughly to the same point (full) or we track lifetime usage.
+    const minOdo = sorted[0].odometer;
+    const maxOdo = sorted[sorted.length - 1].odometer;
+    const totalDistance = maxOdo - minOdo;
+
+    // Fuel used to travel this distance:
+    const fuelUsed = sorted.slice(1).reduce((acc, log) => acc + log.litres, 0);
+
+    const efficiency = fuelUsed > 0 ? (totalDistance / fuelUsed) : 0;
 
     setStats({
-      avgMpg: parseFloat(efficiency.toFixed(1)), // Treating as km/L or MPG generic unit
+      avgMpg: parseFloat(efficiency.toFixed(1)),
       totalCost: parseFloat(totalCost.toFixed(2)),
-      totalDistance: currentLogs.length > 0 ? currentLogs[0].odometer : 0, // Showing max odo recorded
-      totalFuel: parseFloat(totalFuel.toFixed(1))
+      totalDistance: totalDistance,
+      totalFuel: parseFloat(fuelUsed.toFixed(1)) 
     });
   };
 
   const refreshData = () => {
-    if (user) fetchData(user.id);
+    if (user) {
+      fetchUserData(); // Refresh profile too
+      fetchData(user.id);
+    }
   };
+
+  const CurrencySymbol = () => <span className="font-sans">{user?.currency === 'INR' ? '₹' : (user?.currency === 'USD' ? '$' : user?.currency)}</span>;
+
+  // Icon selector based on currency
+  const CostIcon = user?.currency === 'INR' ? IndianRupee : DollarSign;
 
   return (
     <div className="min-h-screen bg-brand-light dark:bg-obsidian transition-colors duration-500 flex flex-col md:flex-row font-sans text-gray-900 dark:text-white">
@@ -145,8 +144,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <nav className="flex-1 space-y-2">
           {[
             { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={18} /> },
+            { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
             { id: 'vehicles', label: 'Vehicles', icon: <Car size={18} /> },
             { id: 'history', label: 'Log History', icon: <History size={18} /> },
+            { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
           ].map((item) => (
             <button
               key={item.id}
@@ -185,13 +186,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
             <div>
-              <h1 className="text-3xl font-bold font-serif dark:font-mono mb-2 text-gray-900 dark:text-white">
-                {activeTab === 'overview' ? 'Fleet Overview' : activeTab === 'vehicles' ? 'Vehicle Management' : 'Fuel Logs'}
+              <h1 className="text-3xl font-bold font-serif dark:font-mono mb-2 text-gray-900 dark:text-white capitalize">
+                {activeTab.replace('-', ' ')}
               </h1>
               <p className="text-gray-500 dark:text-gray-400 text-sm">
                 {user ? `Welcome back, ${user.first_name || 'Pilot'}.` : 'Loading profile...'}
               </p>
             </div>
+            {activeTab === 'overview' && (
+               <div className="flex items-center gap-2 text-xs font-mono text-gray-500 bg-white dark:bg-black/40 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-glass-border shadow-sm">
+                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                 SYSTEM ONLINE
+               </div>
+            )}
           </div>
 
           {activeTab === 'overview' && (
@@ -200,9 +207,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 {[
                   { label: 'Avg Efficiency', value: stats.avgMpg, unit: 'km/L', icon: <Gauge className="text-blue-500" />, change: '+2.1%' },
-                  { label: 'Total Spend', value: stats.totalCost, unit: user?.currency || 'INR', icon: <DollarSign className="text-green-500" />, change: 'Total' },
-                  { label: 'Max Odometer', value: stats.totalDistance.toLocaleString(), unit: 'km', icon: <History className="text-purple-500" />, change: 'Lifetime' },
-                  { label: 'Fuel Consumed', value: stats.totalFuel, unit: 'L', icon: <Fuel className="text-orange-500" />, change: 'Total' },
+                  { label: 'Total Spend', value: stats.totalCost, unit: '', icon: <CostIcon className="text-green-500" />, change: 'Total', prefix: true },
+                  { label: 'Fleet Mileage', value: stats.totalDistance.toLocaleString(), unit: 'km', icon: <History className="text-purple-500" />, change: 'Tracked' },
+                  { label: 'Fuel Consumed', value: stats.totalFuel, unit: 'L', icon: <Fuel className="text-orange-500" />, change: 'Since Start' },
                 ].map((stat, i) => (
                   <div key={i} className="glass-panel p-6 rounded-2xl bg-white dark:bg-black/40 border border-gray-100 dark:border-glass-border shadow-soft dark:shadow-none animate-fade-in-up" style={{animationDelay: `${i*100}ms`}}>
                     <div className="flex justify-between items-start mb-4">
@@ -211,8 +218,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                         {stat.change}
                       </div>
                     </div>
-                    <div className="text-2xl font-bold font-mono text-gray-900 dark:text-white mb-1">
-                      {stat.value} <span className="text-sm font-normal text-gray-500">{stat.unit}</span>
+                    <div className="text-2xl font-bold font-mono text-gray-900 dark:text-white mb-1 flex items-baseline gap-1">
+                      {stat.prefix && <CurrencySymbol />} {stat.value} <span className="text-sm font-normal text-gray-500">{stat.unit}</span>
                     </div>
                     <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{stat.label}</div>
                   </div>
@@ -237,7 +244,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                             <div className="text-xs text-gray-500">{vehicle.year} {vehicle.make} {vehicle.model}</div>
                           </div>
                           <div className="text-right">
-                            <div className="font-mono font-bold text-sm">{vehicle.current_odometer.toLocaleString()} km</div>
+                            <div className="font-mono font-bold text-sm text-gray-700 dark:text-gray-300">{vehicle.current_odometer.toLocaleString()} km</div>
                             <div className="text-[10px] text-green-500">Active</div>
                           </div>
                        </div>
@@ -246,8 +253,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                    </div>
                 </div>
 
-                {/* Profile Card */}
-                <div className="glass-panel rounded-2xl p-6 bg-gray-900 dark:bg-[#111] border border-transparent dark:border-glass-border text-white relative overflow-hidden shadow-2xl animate-fade-in-up delay-300">
+                {/* Profile Card - Enhanced for visibility in Light Mode */}
+                <div className="rounded-2xl p-6 bg-gray-900 dark:bg-[#111] border border-gray-800 dark:border-glass-border text-white relative overflow-hidden shadow-2xl animate-fade-in-up delay-300">
+                   {/* removed glass-panel class to prevent white background override in light mode */}
                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/20 dark:bg-neural-cyan/10 blur-[50px] rounded-full"></div>
                    
                    <div className="relative z-10">
@@ -264,7 +272,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                        </div>
                        <div className="flex justify-between text-sm border-b border-white/10 pb-2">
                          <span className="text-white/60">Currency</span>
-                         <span className="font-mono font-bold">{user?.currency}</span>
+                         <span className="font-mono font-bold">{user?.currency || 'INR'}</span>
                        </div>
                      </div>
                    </div>
@@ -273,12 +281,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             </>
           )}
 
+          {activeTab === 'analytics' && (
+             <Analytics logs={logs} vehicles={vehicles} currency={user?.currency || 'INR'} />
+          )}
+
           {activeTab === 'vehicles' && (
              <VehicleManager vehicles={vehicles} refreshData={refreshData} userEmail={userEmail} />
           )}
 
           {activeTab === 'history' && (
              <FuelLogManager logs={logs} vehicles={vehicles} refreshData={refreshData} userEmail={userEmail} />
+          )}
+
+          {activeTab === 'settings' && user && (
+            <Settings user={user} refreshProfile={fetchUserData} isDark={isDark} toggleTheme={toggleTheme} />
           )}
 
         </div>
