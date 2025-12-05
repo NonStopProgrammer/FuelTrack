@@ -17,8 +17,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('opacity-100', 'translate-y-0');
-          entry.target.classList.remove('opacity-0', 'translate-y-10');
+          entry.target.classList.add('reveal-visible');
         }
       });
     }, { threshold: 0.1 });
@@ -45,7 +44,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
     },
     { 
       title: "Fleet Compliance", 
-      desc: "Automated IRS-ready reports for tax season. Unified control plane for 1 to 10,000 vehicles.", 
+      desc: "Automated standard reports for season. Unified control plane for 1 to 10,000 vehicles.", 
       moreInfo: "Export standard CSV/PDF reports formatted specifically for tax deduction compliance.",
       icon: <Shield /> 
     }
@@ -76,18 +75,18 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
            <div className="flex items-center gap-3 md:gap-4">
              <button 
                onClick={toggleTheme}
-               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-600 dark:text-gray-300"
+               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-600 dark:text-gray-300 btn-press"
                aria-label="Toggle Theme"
              >
                {isDark ? <Sun size={20} /> : <Moon size={20} />}
              </button>
 
-             <button onClick={() => onNavigate('login')} className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-2 py-1">
+             <button onClick={() => onNavigate('login')} className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-2 py-1 btn-press">
                <LogIn size={18} />
                <span>Log In</span>
              </button>
              
-             <button onClick={() => onNavigate('signup')} className="bg-gray-900 dark:bg-white text-white dark:text-black px-4 md:px-6 py-2.5 rounded-full font-medium text-sm shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300">
+             <button onClick={() => onNavigate('signup')} className="bg-gray-900 dark:bg-white text-white dark:text-black px-4 md:px-6 py-2.5 rounded-full font-medium text-sm shadow-xl hover:shadow-2xl btn-press transition-all duration-300">
                Get Started
              </button>
            </div>
@@ -95,10 +94,10 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
       </nav>
       
       <main className="relative z-10 pt-40 pb-20 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[70vh]">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-center min-h-[70vh]">
           
-          <div className="reveal-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-100">
-            <h1 className="text-6xl lg:text-8xl leading-[1.0] text-gray-900 dark:text-white mb-8 tracking-tighter">
+          <div className="flex-1 reveal-on-scroll delay-100 lg:max-w-xl">
+            <h1 className="text-6xl lg:text-7xl leading-[1.0] text-gray-900 dark:text-white mb-8 tracking-tighter">
               <span className="font-sans font-bold block mb-2">FuelTrack —</span>
               <span className="font-serif italic font-normal text-brand-orange dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-neural-cyan dark:to-neural-purple block pb-2">Smarter Fuel,<br/>Happier Rides</span>
             </h1>
@@ -108,7 +107,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 mb-12 items-start sm:items-center">
-              <button onClick={() => onNavigate('dashboard')} className="group bg-gradient-to-r from-orange-400 to-orange-600 dark:from-neural-cyan dark:to-blue-600 text-white dark:text-black px-8 py-4 rounded-full font-sans dark:font-mono text-medium font-medium shadow-glow dark:shadow-neon-cyan hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2">
+              <button onClick={() => onNavigate('dashboard')} className="group bg-gradient-to-r from-orange-400 to-orange-600 dark:from-neural-cyan dark:to-blue-600 text-white dark:text-black px-8 py-4 rounded-full font-sans dark:font-mono text-medium font-medium shadow-glow dark:shadow-neon-cyan hover:shadow-lg transition-all flex items-center justify-center gap-2 btn-press">
                 Explore Dashboard
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform"/>
               </button>
@@ -116,7 +115,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
               <div className="flex items-center gap-4">
                  <div className="flex -space-x-3">
                    {[1,2,3].map(i => (
-                     <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-gray-200 dark:bg-gray-800 shadow-sm overflow-hidden">
+                     <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-gray-200 dark:bg-gray-800 shadow-sm overflow-hidden hover:scale-110 transition-transform">
                        <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" className="w-full h-full rounded-full" />
                      </div>
                    ))}
@@ -134,20 +133,20 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono font-medium">
                <div className="px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/50 flex items-center gap-2">
                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                 <Lock size={12} /> SOC2 COMPLIANT
+                 <Lock size={12} /> ENCRYPTED
                </div>
                <div className="px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50 flex items-center gap-2">
-                 <Server size={12} /> IRS READY
+                 <Server size={12} /> 99.9% UPTIME
                </div>
             </div>
           </div>
 
           {/* New Hero Visual - Desktop + Mobile Composition */}
-          <div className="relative h-[600px] w-full flex items-center justify-center reveal-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-300 pointer-events-none lg:pointer-events-auto">
+          <div className="flex-1 relative w-full flex items-center justify-center lg:justify-end reveal-on-scroll delay-300 pointer-events-none lg:pointer-events-auto min-h-[500px]">
              <div className="absolute inset-0 bg-brand-orange/5 dark:bg-neural-cyan/5 blur-[100px] rounded-full pointer-events-none"></div>
              
              {/* Desktop Preview Card */}
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[550px] glow-panel p-6 shadow-2xl transform rotate-[-2deg] hover:rotate-0 transition-transform duration-700 z-10">
+             <div className="relative w-full max-w-[500px] glow-panel p-6 shadow-2xl transform rotate-[-2deg] hover:rotate-0 transition-transform duration-700 z-10 animate-float bg-white/90 dark:bg-[#111]/90 backdrop-blur-md border border-gray-200 dark:border-white/10">
                 {/* Mock Header */}
                 <div className="flex justify-between items-center mb-6">
                    <div>
@@ -167,7 +166,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
                      { label: 'Avg Price', val: '$3.45', color: 'text-orange-500' },
                      { label: 'Distance', val: '12k km', color: 'text-blue-500' }
                    ].map((item, i) => (
-                     <div key={i} className="p-3 bg-gray-50 dark:bg-black/40 rounded-xl border border-gray-100 dark:border-white/5">
+                     <div key={i} className="p-3 bg-gray-50 dark:bg-black/40 rounded-xl border border-gray-100 dark:border-white/5 card-hover">
                         <div className="text-[10px] text-gray-400 uppercase font-bold mb-1">{item.label}</div>
                         <div className={`text-lg font-bold ${item.color}`}>{item.val}</div>
                      </div>
@@ -175,16 +174,16 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
                 </div>
 
                 {/* Mock Chart Area */}
-                <div className="h-40 bg-gray-50 dark:bg-black/40 rounded-xl border border-gray-100 dark:border-white/5 p-4 flex items-end justify-between gap-2 relative overflow-hidden">
+                <div className="h-48 bg-gray-50 dark:bg-black/40 rounded-xl border border-gray-100 dark:border-white/5 p-4 flex items-end justify-between gap-2 relative overflow-hidden">
                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-brand-orange/5 to-transparent"></div>
                    {[40, 65, 45, 80, 55, 90, 70, 85].map((h, i) => (
-                      <div key={i} style={{ height: `${h}%` }} className="flex-1 bg-brand-orange dark:bg-neural-cyan opacity-80 rounded-t-sm"></div>
+                      <div key={i} style={{ height: `${h}%` }} className="flex-1 bg-brand-orange dark:bg-neural-cyan opacity-80 rounded-t-sm hover:opacity-100 transition-opacity"></div>
                    ))}
                 </div>
              </div>
 
              {/* Phone Mockup Overlay */}
-             <div className="absolute -bottom-0 -right-8 w-[200px] bg-black rounded-[2.5rem] p-3 shadow-2xl border-4 border-gray-800 transform rotate-[5deg] hover:rotate-0 transition-transform duration-500 z-20">
+             <div className="absolute -bottom-10 right-4 lg:-right-8 w-[180px] bg-black rounded-[2.5rem] p-3 shadow-2xl border-4 border-gray-800 transform rotate-[5deg] hover:rotate-0 transition-transform duration-500 z-20 animate-float" style={{animationDelay: '1.5s'}}>
                 <div className="bg-[#111] rounded-[2rem] overflow-hidden aspect-[9/18] relative flex flex-col">
                    {/* Mobile Header */}
                    <div className="bg-brand-orange dark:bg-neural-cyan h-20 p-4 flex flex-col justify-end">
@@ -195,7 +194,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
                    {/* Mobile List */}
                    <div className="p-3 space-y-3 flex-1">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center gap-3 p-2 bg-white/5 rounded-xl border border-white/5">
+                        <div key={i} className="flex items-center gap-3 p-2 bg-white/5 rounded-xl border border-white/5 row-hover">
                            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                               <Fuel size={12} className="text-white"/>
                            </div>
@@ -209,7 +208,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
                    </div>
                    
                    {/* FAB */}
-                   <div className="absolute bottom-6 right-4 w-12 h-12 bg-brand-orange dark:bg-neural-cyan rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-transform">
+                   <div className="absolute bottom-6 right-4 w-12 h-12 bg-brand-orange dark:bg-neural-cyan rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-transform btn-press">
                       <Plus size={20} strokeWidth={3} className="text-white dark:text-black"/>
                    </div>
                 </div>
@@ -222,10 +221,10 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
            {features.map((feature, i) => (
              <div 
                key={i} 
-               className={`glow-panel reveal-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out p-8 rounded-3xl group`}
-               style={{ transitionDelay: `${i * 100}ms` }}
+               className={`glow-panel reveal-on-scroll p-8 rounded-3xl group card-hover`}
+               style={{ transitionDelay: `${i * 150}ms` }}
              >
-                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-[#1a1a1a] icon-halo flex items-center justify-center mb-6 group-hover:scale-110 transition-transform relative z-10 border border-orange-50 dark:border-white/5 text-brand-orange dark:text-neural-cyan">
+                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-[#1a1a1a] icon-halo flex items-center justify-center mb-6 group-hover:scale-110 transition-transform relative z-10 border border-orange-50 dark:border-white/5 text-brand-orange dark:text-neural-cyan icon-halo-anim">
                   {feature.icon}
                 </div>
                 
@@ -252,11 +251,15 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
       </main>
       
       <footer className="relative z-10 border-t border-gray-100 dark:border-glass-border py-12 mt-24 bg-white dark:bg-black/20">
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center text-xs text-gray-500 font-mono">
-           <div>&copy; 2025 FUELTRACK INC.</div>
-           <div className="flex gap-4">
-             <a href="#" className="hover:text-brand-orange transition-colors">PRIVACY</a>
-             <a href="#" className="hover:text-brand-orange transition-colors">TERMS</a>
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 font-mono gap-4">
+           <div className="flex items-center gap-2">
+             <span>&copy; 2025 FUELTRACK INC.</span>
+             <span className="hidden md:inline text-gray-300 dark:text-gray-700">|</span>
+             <span className="hidden md:inline">Secure, encrypted, and privacy-focused. Your data is protected.</span>
+           </div>
+           <div className="flex gap-6">
+             <button onClick={() => onNavigate('privacy')} className="hover:text-brand-orange transition-colors">PRIVACY</button>
+             <button onClick={() => onNavigate('terms')} className="hover:text-brand-orange transition-colors">TERMS</button>
            </div>
         </div>
       </footer>

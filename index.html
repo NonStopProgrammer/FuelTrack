@@ -43,7 +43,7 @@
               'neon-cyan': '0 0 30px -5px rgba(34, 211, 238, 0.4)',
             },
             animation: {
-              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+              'fade-in-up': 'fadeInUp 0.8s cubic-bezier(.2,.9,.3,1) forwards',
               'float': 'float 6s ease-in-out infinite',
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             },
@@ -68,11 +68,22 @@
     </script>
     <style>
       :root {
+        /* Theme Variables */
         --glow-color: radial-gradient(circle at 20% 10%, rgba(255,138,0,0.15), transparent 50%);
         --card-bg: rgba(255, 255, 255, 0.8);
         --card-border: rgba(0, 0, 0, 0.05);
         --icon-halo: inset 0 0 20px rgba(255,138,0,0.15);
         --panel-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.05);
+
+        /* Animation Tokens */
+        --dur-fast: 120ms;
+        --dur-medium: 300ms;
+        --dur-slow: 420ms;
+        --easing-soft: cubic-bezier(.2,.9,.3,1);
+        --easing-sharp: cubic-bezier(.4,.0,.2,1);
+        --hover-scale: 1.02;
+        --hover-translate: -4px;
+        --focus-scale: 1.015;
       }
       
       .dark {
@@ -83,12 +94,30 @@
         --panel-shadow: 0 1px 3px rgba(0,0,0,0.40), 0 4px 14px rgba(0,0,0,0.45), 0 18px 32px rgba(0,0,0,0.50);
       }
 
+      /* Accessibility: Reduced Motion */
+      @media (prefers-reduced-motion: reduce) {
+        :root {
+          --dur-fast: 0ms;
+          --dur-medium: 0ms;
+          --dur-slow: 0ms;
+          --hover-scale: 1;
+          --hover-translate: 0;
+        }
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
       body {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         transition: background-color 0.5s ease, color 0.5s ease;
       }
 
+      /* Premium Card & Panel Styles */
       .glow-panel {
         position: relative;
         background: var(--card-bg);
@@ -97,10 +126,9 @@
         box-shadow: var(--panel-shadow);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform var(--dur-medium) var(--easing-soft), box-shadow var(--dur-medium) var(--easing-soft);
       }
       
-      /* The subtle backlight glow */
       .glow-panel::before {
         content: "";
         position: absolute;
@@ -111,15 +139,78 @@
         z-index: -1;
         opacity: 0.7;
         pointer-events: none;
+        transition: opacity var(--dur-medium);
+      }
+
+      /* Hover Effects */
+      .card-hover:hover {
+        transform: translateY(var(--hover-translate)) scale(var(--hover-scale));
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        z-index: 10;
+      }
+      .dark .card-hover:hover {
+         box-shadow: 0 20px 40px -5px rgba(0,0,0,0.6);
       }
 
       .icon-halo {
         box-shadow: var(--icon-halo);
-        border-radius: 0.75rem; /* rounded-xl */
+        border-radius: 0.75rem;
+        transition: transform var(--dur-medium) var(--easing-soft);
       }
 
+      @keyframes haloPulse {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.1); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+
+      .icon-halo-anim:hover .icon-halo {
+         animation: haloPulse 2s var(--easing-soft) infinite;
+      }
+
+      /* Button Micro-interactions */
+      .btn-press {
+        transition: transform var(--dur-fast) var(--easing-sharp), box-shadow var(--dur-fast);
+      }
+      .btn-press:active {
+        transform: scale(0.96);
+      }
+      .btn-press:hover {
+        transform: translateY(-2px);
+      }
+
+      /* List/Table Row Interactions */
+      .row-hover {
+        transition: transform var(--dur-fast) ease-out, background-color var(--dur-fast);
+        border-left: 3px solid transparent;
+      }
+      .row-hover:hover {
+        transform: translateX(4px);
+        background-color: rgba(0,0,0,0.02);
+        border-left-color: #F97316; /* Brand Orange */
+      }
+      .dark .row-hover:hover {
+        background-color: rgba(255,255,255,0.03);
+        border-left-color: #22d3ee; /* Neural Cyan */
+      }
+
+      /* Entrance Animations */
       .reveal-on-scroll {
-        will-change: transform, opacity;
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity var(--dur-medium) ease-out, transform var(--dur-medium) var(--easing-soft);
+      }
+      .reveal-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .modal-enter {
+        animation: scaleIn var(--dur-medium) var(--easing-soft) forwards;
       }
     </style>
   <script type="importmap">

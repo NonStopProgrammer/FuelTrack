@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { Auth } from './components/Auth';
 import { Dashboard } from './components/Dashboard';
+import { PrivacyTerms } from './components/PrivacyTerms';
 import { ViewState } from './types';
 
 function App() {
@@ -26,6 +27,10 @@ function App() {
         return <Auth mode="login" onNavigate={(view) => setCurrentView(view)} />;
       case 'signup':
         return <Auth mode="signup" onNavigate={(view) => setCurrentView(view)} />;
+      case 'privacy':
+        return <PrivacyTerms mode="privacy" onBack={() => setCurrentView('landing')} />;
+      case 'terms':
+        return <PrivacyTerms mode="terms" onBack={() => setCurrentView('landing')} />;
       default:
         return (
           <LandingPage 

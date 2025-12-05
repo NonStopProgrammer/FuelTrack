@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type ViewState = 'landing' | 'login' | 'signup' | 'dashboard';
+export type ViewState = 'landing' | 'login' | 'signup' | 'dashboard' | 'privacy' | 'terms';
 
 export interface NavItem {
   label: string;

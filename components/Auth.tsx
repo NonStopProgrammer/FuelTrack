@@ -106,7 +106,7 @@ export const Auth: React.FC<AuthProps> = ({ mode, onNavigate }) => {
        
        <button 
          onClick={() => onNavigate('landing')}
-         className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors z-20"
+         className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors z-20 btn-press"
        >
          <ArrowLeft size={16} /> Back
        </button>
@@ -119,7 +119,7 @@ export const Auth: React.FC<AuthProps> = ({ mode, onNavigate }) => {
             </div>
           </div>
 
-          <div className="glow-panel p-8 md:p-10 backdrop-blur-xl transition-all duration-500">
+          <div className="glow-panel p-8 md:p-10 backdrop-blur-xl transition-all duration-500 modal-enter">
             <h2 className="text-2xl font-bold text-center mb-2 text-gray-900 dark:text-white font-serif dark:font-mono">
               {mode === 'login' ? 'Welcome Back' : 'Initialize Fleet Account'}
             </h2>
@@ -242,7 +242,7 @@ export const Auth: React.FC<AuthProps> = ({ mode, onNavigate }) => {
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-brand-orange dark:bg-neural-cyan text-white dark:text-black font-bold rounded-xl shadow-lg dark:shadow-neon-cyan hover:opacity-90 transition-all mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full py-3.5 bg-brand-orange dark:bg-neural-cyan text-white dark:text-black font-bold rounded-xl shadow-lg dark:shadow-neon-cyan hover:opacity-90 transition-all mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center btn-press"
               >
                 {loading ? (
                    <div className="w-5 h-5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin"></div>

@@ -208,14 +208,36 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
 
   if (!stats) return <div className="p-12 text-center text-gray-500">Log more data to unlock analytics.</div>;
 
-  // --- Chart Configs ---
+  // --- Chart Configs with Animation Tokens ---
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
   const commonOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: {
+      duration: prefersReducedMotion ? 0 : 500, // Respect reduced motion
+      easing: 'easeOutQuart' as const,
+    },
+    transitions: {
+      active: {
+        animation: {
+          duration: prefersReducedMotion ? 0 : 300,
+        }
+      }
+    },
     plugins: { legend: { display: false }, title: { display: false } },
     scales: {
       x: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#888', font: { size: 10 } } },
       y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#888', font: { size: 10 } } }
+    },
+    elements: {
+      point: {
+        radius: 0,
+        hoverRadius: 6, // Scale up on hover
+      },
+      line: {
+        tension: 0.4, // Smooth curves
+      }
     }
   };
 
@@ -274,7 +296,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
     datasets: [{
       data: stats.vehicleStats.map(v => v.spend),
       backgroundColor: ['#F97316', '#22d3ee', '#d946ef', '#10b981', '#6366f1'],
-      borderWidth: 0
+      borderWidth: 0,
+      hoverOffset: 15 // Doughnut specific animation
     }]
   };
   
@@ -303,14 +326,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
       label: 'Price vs Efficiency',
       data: stats.outlierPoints,
       backgroundColor: 'rgba(34, 211, 238, 0.6)',
-      borderColor: 'transparent'
+      borderColor: 'transparent',
+      pointHoverRadius: 8
     }]
   };
 
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="space-y-8 animate-fade-in-up pb-20">
+    <div className="space-y-8 pb-20">
       
       {/* 1. KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -320,7 +344,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
           { label: 'Avg Price/L', value: `${currency} ${stats.avgPrice.toFixed(2)}`, icon: <TrendingUp size={16}/>, color: 'text-orange-500' },
           { label: 'Fleet Efficiency', value: `${stats.avgEfficiency.toFixed(1)} km/L`, icon: <Gauge size={16}/>, color: 'text-purple-500' },
         ].map((kpi, i) => (
-          <div key={i} className="glow-panel p-5">
+          <div key={i} className="glow-panel p-5 card-hover icon-halo-anim reveal-on-scroll" style={{transitionDelay: `${i*60}ms`}}>
              <div className="flex justify-between items-start mb-2">
                <span className="text-xs font-bold uppercase text-gray-400 tracking-wider">{kpi.label}</span>
                <div className={`p-1.5 rounded-lg bg-gray-50 dark:bg-[#1a1a1a] icon-halo ${kpi.color}`}>{kpi.icon}</div>
@@ -332,14 +356,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
 
       {/* 2. Forecast & Cumulative Trend */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-         <div className="lg:col-span-2 glow-panel p-6">
+         <div className="lg:col-span-2 glow-panel p-6 card-hover reveal-on-scroll">
            <h3 className="text-sm font-bold uppercase text-gray-500 mb-6">Cumulative Spend Trend</h3>
            <div className="h-64">
              <Line data={spendChartData} options={commonOptions} />
            </div>
          </div>
          
-         <div className="glow-panel p-6 flex flex-col justify-center">
+         <div className="glow-panel p-6 flex flex-col justify-center card-hover reveal-on-scroll" style={{transitionDelay: '100ms'}}>
             <h3 className="text-sm font-bold uppercase text-gray-500 mb-2">Next Month Forecast</h3>
             <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono mb-2">{stats.forecastMsg}</div>
             <p className="text-xs text-gray-400 leading-relaxed">
@@ -360,14 +384,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
 
       {/* 3. Efficiency & Price Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glow-panel p-6">
+        <div className="glow-panel p-6 card-hover reveal-on-scroll">
            <h3 className="text-sm font-bold uppercase text-gray-500 mb-6">Efficiency Trend (Rolling Avg)</h3>
            <div className="h-64">
              {/* Using 'any' cast to allow mixed chart types (Line in Bar chart) */}
              <Bar data={efficiencyChartData as any} options={commonOptions} />
            </div>
         </div>
-        <div className="glow-panel p-6">
+        <div className="glow-panel p-6 card-hover reveal-on-scroll" style={{transitionDelay: '100ms'}}>
            <h3 className="text-sm font-bold uppercase text-gray-500 mb-6">Fuel Price Fluctuation</h3>
            <div className="h-64">
              <Line data={priceTrendChartData} options={commonOptions} />
@@ -377,18 +401,19 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
 
       {/* 4. Vehicle Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glow-panel p-6">
+        <div className="glow-panel p-6 card-hover reveal-on-scroll">
            <h3 className="text-sm font-bold uppercase text-gray-500 mb-6">Spend Distribution by Vehicle</h3>
            <div className="h-64 flex items-center justify-center">
              <div className="w-64">
                 <Doughnut data={vehicleCostData} options={{
+                  ...commonOptions,
                   plugins: { legend: { display: true, position: 'right', labels: { color: '#888', boxWidth: 10 } } },
                   maintainAspectRatio: false
                 }} />
              </div>
            </div>
         </div>
-        <div className="glow-panel p-6">
+        <div className="glow-panel p-6 card-hover reveal-on-scroll" style={{transitionDelay: '100ms'}}>
            <h3 className="text-sm font-bold uppercase text-gray-500 mb-6">Total Distance by Vehicle</h3>
            <div className="h-64">
              <Bar data={vehicleDistData} options={{...commonOptions, indexAxis: 'y' as const}} />
@@ -397,7 +422,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
       </div>
 
       {/* 5. Behavioral Heatmap (Custom CSS Grid) */}
-      <div className="glow-panel p-6">
+      <div className="glow-panel p-6 card-hover reveal-on-scroll">
          <div className="flex justify-between items-center mb-6">
             <h3 className="text-sm font-bold uppercase text-gray-500">Fill-up Time Heatmap</h3>
             <span className="text-xs text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded">Darker = More Frequent</span>
@@ -429,14 +454,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
 
       {/* 6. Stations & Correlations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glow-panel p-6">
+        <div className="glow-panel p-6 card-hover reveal-on-scroll">
            <h3 className="text-sm font-bold uppercase text-gray-500 mb-6">Top Stations by Spend</h3>
            <div className="h-64">
               <Bar data={stationData} options={{...commonOptions, indexAxis: 'y' as const}} />
            </div>
         </div>
         
-        <div className="glow-panel p-6">
+        <div className="glow-panel p-6 card-hover reveal-on-scroll" style={{transitionDelay: '100ms'}}>
            <div className="flex justify-between items-center mb-6">
               <h3 className="text-sm font-bold uppercase text-gray-500">Price vs Efficiency Correlation</h3>
               <AlertTriangle size={14} className="text-yellow-500" />
@@ -455,7 +480,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
 
       {/* 7. Data Quality & Anomalies */}
       {stats.anomalies.length > 0 && (
-        <div className="glow-panel p-6 border-red-100 dark:border-red-900/30">
+        <div className="glow-panel p-6 border-red-100 dark:border-red-900/30 card-hover reveal-on-scroll">
            <div className="flex items-center gap-2 mb-6">
               <ShieldAlert size={20} className="text-red-500" />
               <h3 className="text-sm font-bold uppercase text-red-500">Data Quality Alerts</h3>
@@ -472,7 +497,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, vehicles, currency }
                 </thead>
                 <tbody>
                   {stats.anomalies.map((a, i) => (
-                    <tr key={i} className="border-b border-gray-50 dark:border-white/5">
+                    <tr key={i} className="border-b border-gray-50 dark:border-white/5 row-hover">
                       <td className="px-4 py-3 font-mono text-xs">{new Date(a.date).toLocaleDateString()}</td>
                       <td className="px-4 py-3 font-medium">{a.vehicle}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{a.details}</td>

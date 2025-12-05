@@ -31,13 +31,24 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this vehicle? All fuel logs will also be removed.')) return;
+    if (!confirm('Are you sure you want to delete this vehicle? All linked fuel logs will be permanently removed.')) return;
     
     setLoading(true);
-    const { error } = await supabase.from('vehicles').delete().eq('id', id);
-    if (error) alert('Error deleting vehicle');
-    else refreshData();
-    setLoading(false);
+    try {
+      // 1. Manually cascade delete logs first (frontend enforcement)
+      const { error: logError } = await supabase.from('fuel_entries').delete().eq('vehicle_id', id);
+      if (logError) throw logError;
+
+      // 2. Delete vehicle
+      const { error: vehicleError } = await supabase.from('vehicles').delete().eq('id', id);
+      if (vehicleError) throw vehicleError;
+
+      refreshData();
+    } catch (err: any) {
+      alert('Error deleting vehicle: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,12 +105,12 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
   };
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
+    <div className="space-y-6 reveal-on-scroll">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold font-serif dark:font-mono text-gray-900 dark:text-white">Your Fleet</h2>
         <button 
           onClick={() => { setEditingId(null); setShowModal(true); }}
-          className="bg-brand-orange dark:bg-neural-cyan text-white dark:text-black px-4 py-2 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
+          className="bg-brand-orange dark:bg-neural-cyan text-white dark:text-black px-4 py-2 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2 hover:opacity-90 transition-opacity btn-press"
         >
           <Plus size={16} /> Add Vehicle
         </button>
@@ -107,16 +118,16 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {vehicles.map((v) => (
-          <div key={v.id} className="glow-panel p-6 relative group">
+          <div key={v.id} className="glow-panel p-6 relative group card-hover icon-halo-anim">
             <div className="flex justify-between items-start mb-4">
                <div className="p-3 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl icon-halo">
                  <Car className="text-brand-orange dark:text-neural-cyan" size={24} />
                </div>
                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                 <button onClick={() => handleEdit(v)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400">
+                 <button onClick={() => handleEdit(v)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400 btn-press">
                    <Edit2 size={16} />
                  </button>
-                 <button onClick={() => handleDelete(v.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500">
+                 <button onClick={() => handleDelete(v.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 btn-press">
                    <Trash2 size={16} />
                  </button>
                </div>
@@ -149,12 +160,12 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
            <div className="absolute inset-0 bg-black/30 dark:bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
-           <div className="relative w-full max-w-2xl bg-white dark:bg-[#111] rounded-3xl p-8 shadow-2xl animate-fade-in-up border border-gray-100 dark:border-gray-800 overflow-y-auto max-h-[90vh]">
+           <div className="relative w-full max-w-2xl bg-white dark:bg-[#111] rounded-3xl p-8 shadow-2xl modal-enter border border-gray-100 dark:border-gray-800 overflow-y-auto max-h-[90vh]">
              <div className="flex justify-between items-center mb-6">
                <h3 className="text-2xl font-bold text-gray-900 dark:text-white font-serif dark:font-mono">
                  {editingId ? 'Edit Vehicle' : 'Add New Vehicle'}
                </h3>
-               <button onClick={() => setShowModal(false)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10"><X size={20}/></button>
+               <button onClick={() => setShowModal(false)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 btn-press"><X size={20}/></button>
              </div>
 
              <form onSubmit={handleSubmit} className="space-y-6">
@@ -208,7 +219,7 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
                    </div>
                 </div>
 
-                <button type="submit" disabled={loading} className="w-full py-4 bg-brand-orange dark:bg-neural-cyan text-white dark:text-black font-bold rounded-xl shadow-lg mt-4 hover:opacity-90 transition-opacity">
+                <button type="submit" disabled={loading} className="w-full py-4 bg-brand-orange dark:bg-neural-cyan text-white dark:text-black font-bold rounded-xl shadow-lg mt-4 hover:opacity-90 transition-opacity btn-press">
                   {loading ? 'Saving...' : 'Save Vehicle'}
                 </button>
              </form>
