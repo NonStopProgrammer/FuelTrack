@@ -107,9 +107,9 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {vehicles.map((v) => (
-          <div key={v.id} className="glass-panel p-6 rounded-2xl bg-white dark:bg-black/40 border border-gray-100 dark:border-glass-border shadow-soft dark:shadow-none relative group">
+          <div key={v.id} className="glow-panel p-6 relative group">
             <div className="flex justify-between items-start mb-4">
-               <div className="p-3 bg-gray-100 dark:bg-white/10 rounded-xl">
+               <div className="p-3 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl icon-halo">
                  <Car className="text-brand-orange dark:text-neural-cyan" size={24} />
                </div>
                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -126,11 +126,11 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{v.year} {v.make} {v.model}</p>
             
             <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="p-2 bg-gray-50 dark:bg-white/5 rounded-lg">
+              <div className="p-2 bg-gray-50 dark:bg-black/30 rounded-lg border border-gray-100 dark:border-white/5">
                 <div className="text-gray-400 uppercase tracking-wider text-[10px]">Odometer</div>
                 <div className="font-mono font-bold text-gray-700 dark:text-gray-200">{v.current_odometer.toLocaleString()} km</div>
               </div>
-              <div className="p-2 bg-gray-50 dark:bg-white/5 rounded-lg">
+              <div className="p-2 bg-gray-50 dark:bg-black/30 rounded-lg border border-gray-100 dark:border-white/5">
                 <div className="text-gray-400 uppercase tracking-wider text-[10px]">Tank</div>
                 <div className="font-mono font-bold text-gray-700 dark:text-gray-200">{v.tank_capacity_l} L</div>
               </div>

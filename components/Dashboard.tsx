@@ -133,7 +133,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
   return (
     <div className="min-h-screen bg-brand-light dark:bg-obsidian transition-colors duration-500 flex flex-col md:flex-row font-sans text-gray-900 dark:text-white">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white dark:bg-[#0a0a0a] border-r border-gray-200 dark:border-glass-border p-6 flex flex-col z-20 shadow-card dark:shadow-none">
+      <aside className="w-full md:w-64 bg-white dark:bg-matte-dark border-r border-gray-200 dark:border-glass-border p-6 flex flex-col z-20 shadow-light-md dark:shadow-none">
         <div className="flex items-center gap-2 mb-10">
           <div className="bg-gradient-to-br from-brand-orange to-brand-darkOrange dark:from-neural-cyan dark:to-blue-600 p-1.5 rounded-lg text-white dark:text-black shadow-lg dark:shadow-neon-cyan">
              <Fuel size={20} />
@@ -154,8 +154,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                 activeTab === item.id
-                  ? 'bg-brand-orange/10 dark:bg-neural-cyan/10 text-brand-orange dark:text-neural-cyan shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
+                  ? 'bg-brand-orange/10 dark:bg-neural-cyan/10 text-brand-orange dark:text-neural-cyan shadow-sm border border-brand-orange/5 dark:border-neural-cyan/5'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
               }`}
             >
               {item.icon}
@@ -178,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
         {/* Background Ambience */}
         <div className="fixed inset-0 pointer-events-none z-0">
            <div className="absolute inset-0 bg-mesh-gradient-light opacity-30 dark:opacity-0 transition-opacity"></div>
-           <div className="absolute inset-0 bg-mesh-gradient opacity-0 dark:opacity-10 dark:animate-pulse-slow transition-opacity"></div>
+           <div className="absolute inset-0 bg-mesh-gradient opacity-0 dark:opacity-1 dark:animate-pulse-slow transition-opacity"></div>
         </div>
 
         <div className="relative z-10 p-6 md:p-10 max-w-7xl mx-auto pb-20">
@@ -194,7 +194,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
               </p>
             </div>
             {activeTab === 'overview' && (
-               <div className="flex items-center gap-2 text-xs font-mono text-gray-500 bg-white dark:bg-black/40 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-glass-border shadow-sm">
+               <div className="flex items-center gap-2 text-xs font-mono text-gray-500 bg-white dark:bg-matte-dark px-3 py-1.5 rounded-lg border border-gray-100 dark:border-glass-border shadow-sm">
                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                  SYSTEM ONLINE
                </div>
@@ -211,9 +211,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
                   { label: 'Fleet Mileage', value: stats.totalDistance.toLocaleString(), unit: 'km', icon: <History className="text-purple-500" />, change: 'Tracked' },
                   { label: 'Fuel Consumed', value: stats.totalFuel, unit: 'L', icon: <Fuel className="text-orange-500" />, change: 'Since Start' },
                 ].map((stat, i) => (
-                  <div key={i} className="glass-panel p-6 rounded-2xl bg-white dark:bg-black/40 border border-gray-100 dark:border-glass-border shadow-soft dark:shadow-none animate-fade-in-up" style={{animationDelay: `${i*100}ms`}}>
+                  <div key={i} className="glow-panel p-6 animate-fade-in-up" style={{animationDelay: `${i*100}ms`}}>
                     <div className="flex justify-between items-start mb-4">
-                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">{stat.icon}</div>
+                      <div className="p-2.5 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl icon-halo">{stat.icon}</div>
                       <div className={`text-xs font-bold px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300`}>
                         {stat.change}
                       </div>
@@ -228,15 +228,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Vehicle List Preview */}
-                <div className="lg:col-span-2 glass-panel rounded-2xl p-6 bg-white dark:bg-black/40 border border-gray-100 dark:border-glass-border shadow-soft dark:shadow-none animate-fade-in-up delay-200">
+                <div className="lg:col-span-2 glow-panel p-6 animate-fade-in-up delay-200">
                    <div className="flex justify-between items-center mb-6">
                      <h3 className="font-bold text-lg font-serif dark:font-sans">Active Vehicles</h3>
                      <button onClick={() => setActiveTab('vehicles')} className="text-xs font-bold text-brand-orange dark:text-neural-cyan hover:underline">VIEW ALL</button>
                    </div>
                    <div className="space-y-4">
                      {vehicles.slice(0, 3).map((vehicle) => (
-                       <div key={vehicle.id} className="flex items-center p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-transparent hover:border-brand-orange dark:hover:border-neural-cyan transition-colors group cursor-pointer">
-                          <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-lg flex items-center justify-center mr-4 shadow-sm dark:shadow-none">
+                       <div key={vehicle.id} className="flex items-center p-4 rounded-xl bg-gray-50 dark:bg-black/40 border border-transparent hover:border-brand-orange dark:hover:border-neural-cyan transition-colors group cursor-pointer shadow-sm">
+                          <div className="w-12 h-12 bg-white dark:bg-matte-dark rounded-lg flex items-center justify-center mr-4 shadow-sm dark:shadow-none border border-gray-100 dark:border-white/5">
                             <Car size={20} className="text-gray-500 dark:text-gray-400 group-hover:text-brand-orange dark:group-hover:text-neural-cyan transition-colors" />
                           </div>
                           <div className="flex-1">
@@ -253,28 +253,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
                    </div>
                 </div>
 
-                {/* Profile Card - Enhanced for visibility in Light Mode */}
-                <div className="rounded-2xl p-6 bg-gray-900 dark:bg-[#111] border border-gray-800 dark:border-glass-border text-white relative overflow-hidden shadow-2xl animate-fade-in-up delay-300">
-                   {/* removed glass-panel class to prevent white background override in light mode */}
-                   <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/20 dark:bg-neural-cyan/10 blur-[50px] rounded-full"></div>
-                   
-                   <div className="relative z-10">
-                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-700 to-black mb-4 flex items-center justify-center font-bold text-2xl border border-white/20">
-                       {user?.first_name?.[0] || 'U'}
-                     </div>
-                     <h3 className="text-2xl font-bold font-serif dark:font-mono mb-1">{user?.first_name} {user?.last_name}</h3>
-                     <p className="text-white/60 text-sm mb-8">{user?.organization || 'Organization'}</p>
-                     
-                     <div className="space-y-3">
-                       <div className="flex justify-between text-sm border-b border-white/10 pb-2">
-                         <span className="text-white/60">Vehicles</span>
-                         <span className="font-mono font-bold text-brand-orange dark:text-neural-cyan">{vehicles.length}</span>
-                       </div>
-                       <div className="flex justify-between text-sm border-b border-white/10 pb-2">
-                         <span className="text-white/60">Currency</span>
-                         <span className="font-mono font-bold">{user?.currency || 'INR'}</span>
-                       </div>
-                     </div>
+                {/* Profile Card */}
+                <div className="glow-panel p-6 animate-fade-in-up delay-300">
+                   {/* Layout Grid Fix */}
+                   <div className="grid grid-cols-[auto_1fr] gap-4 items-center mb-6">
+                      {/* Avatar */}
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-700 to-black flex items-center justify-center font-bold text-2xl text-white border border-white/20 shadow-lg">
+                         {user?.first_name?.[0] || 'U'}
+                      </div>
+                      
+                      {/* Name & Org */}
+                      <div>
+                         <h3 className="text-xl font-bold font-serif dark:font-mono text-gray-900 dark:text-white leading-tight">
+                            {user?.first_name} {user?.last_name}
+                         </h3>
+                         <div className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-brand-orange/10 text-brand-orange dark:bg-neural-cyan/10 dark:text-neural-cyan tracking-wider">
+                            {user?.organization || 'Manager'}
+                         </div>
+                      </div>
+                   </div>
+
+                   {/* Stats Area */}
+                   <div className="border-t border-gray-100 dark:border-white/10 pt-4 grid grid-cols-2 gap-4">
+                      <div>
+                         <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vehicles</div>
+                         <div className="text-lg font-mono font-bold text-gray-900 dark:text-white">
+                           {vehicles.length > 0 ? vehicles.length : <span className="text-gray-400 text-sm">None</span>}
+                         </div>
+                      </div>
+                      <div className="text-right">
+                         <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Currency</div>
+                         <div className="text-lg font-mono font-bold text-brand-orange dark:text-neural-cyan">
+                            {user?.currency || 'INR'}
+                         </div>
+                      </div>
                    </div>
                 </div>
               </div>

@@ -23,19 +23,20 @@
               brand: {
                 orange: '#F97316', 
                 darkOrange: '#EA580C',
-                light: '#FFFFFF', 
+                light: '#FAFAFA', 
                 dark: '#050505',
                 yellow: '#FFF7ED', 
                 gray: '#F9FAFB',
               },
               obsidian: '#050505',
+              'matte-dark': '#111213',
               'neural-cyan': '#22d3ee',
               'neural-purple': '#d946ef',
-              'glass-border': 'rgba(255, 255, 255, 0.1)',
+              'glass-border': 'rgba(255, 255, 255, 0.08)',
             },
             boxShadow: {
-              'soft': '0 20px 40px -15px rgba(0, 0, 0, 0.05)',
-              'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05)',
+              'light-md': '0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.05)',
+              'dark-md': '0 1px 3px rgba(0,0,0,0.40), 0 4px 14px rgba(0,0,0,0.45), 0 18px 32px rgba(0,0,0,0.50)',
               'glow': '0 0 30px -5px rgba(249, 115, 22, 0.3)',
               'orange-glow': '0 0 40px -5px rgba(249, 115, 22, 0.5)',
               'cyan-glow': '0 0 40px -5px rgba(34, 211, 238, 0.4)',
@@ -66,23 +67,57 @@
       }
     </script>
     <style>
+      :root {
+        --glow-color: radial-gradient(circle at 20% 10%, rgba(255,138,0,0.15), transparent 50%);
+        --card-bg: rgba(255, 255, 255, 0.8);
+        --card-border: rgba(0, 0, 0, 0.05);
+        --icon-halo: inset 0 0 20px rgba(255,138,0,0.15);
+        --panel-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.05);
+      }
+      
+      .dark {
+        --glow-color: radial-gradient(circle at 20% 10%, rgba(34, 211, 238, 0.12), transparent 50%);
+        --card-bg: rgba(17, 18, 19, 0.85);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --icon-halo: inset 0 0 20px rgba(34, 211, 238, 0.15);
+        --panel-shadow: 0 1px 3px rgba(0,0,0,0.40), 0 4px 14px rgba(0,0,0,0.45), 0 18px 32px rgba(0,0,0,0.50);
+      }
+
       body {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         transition: background-color 0.5s ease, color 0.5s ease;
       }
-      .glass-panel {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+
+      .glow-panel {
+        position: relative;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 1rem;
+        box-shadow: var(--panel-shadow);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
-      /* Enhanced Visibility for Light Mode */
-      .light .glass-panel {
-        background: #FFFFFF;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+      
+      /* The subtle backlight glow */
+      .glow-panel::before {
+        content: "";
+        position: absolute;
+        inset: -15px;
+        border-radius: inherit;
+        background: var(--glow-color);
+        filter: blur(25px);
+        z-index: -1;
+        opacity: 0.7;
+        pointer-events: none;
       }
+
+      .icon-halo {
+        box-shadow: var(--icon-halo);
+        border-radius: 0.75rem; /* rounded-xl */
+      }
+
       .reveal-on-scroll {
         will-change: transform, opacity;
       }

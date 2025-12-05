@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   Fuel, TrendingUp, Gauge, Shield, ChevronRight, 
   ArrowRight, Star, Sun, Moon, LogIn, Server, Lock, Globe,
-  Map, Zap, BarChart3, PieChart
+  Plus, Droplet
 } from 'lucide-react';
 import { ViewState } from '../types';
 
@@ -13,7 +13,6 @@ interface LandingProps {
 }
 
 export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggleTheme }) => {
-  // Simple intersection observer for scroll animations
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -99,25 +98,25 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[70vh]">
           
           <div className="reveal-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-100">
-            <h1 className="text-6xl lg:text-8xl leading-[0.9] text-gray-900 dark:text-white mb-8 tracking-tighter">
-              <span className="font-sans font-light block mb-2">Master Your</span>
-              <span className="font-serif italic font-normal text-brand-orange dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-neural-cyan dark:to-neural-purple block pb-2">Fleet Operations</span>
+            <h1 className="text-6xl lg:text-8xl leading-[1.0] text-gray-900 dark:text-white mb-8 tracking-tighter">
+              <span className="font-sans font-bold block mb-2">FuelTrack —</span>
+              <span className="font-serif italic font-normal text-brand-orange dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-neural-cyan dark:to-neural-purple block pb-2">Smarter Fuel,<br/>Happier Rides</span>
             </h1>
             
             <p className="text-gray-600 dark:text-gray-400 text-lg lg:text-xl max-w-lg leading-relaxed mb-10 font-sans dark:font-mono font-light">
-              Eliminate mileage guesswork. FuelTrack automates telemetry data, detects cost leaks, and ensures 100% tax compliance with zero manual entry.
+              Track fuel, monitor efficiency and manage fleet costs with clear analytics.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 mb-12 items-start sm:items-center">
-              <button onClick={() => onNavigate('signup')} className="group bg-gradient-to-r from-orange-400 to-orange-600 dark:from-neural-cyan dark:to-blue-600 text-white dark:text-black px-8 py-4 rounded-full font-sans dark:font-mono text-medium font-medium shadow-glow dark:shadow-neon-cyan hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2">
-                Start Tracking Free
+              <button onClick={() => onNavigate('dashboard')} className="group bg-gradient-to-r from-orange-400 to-orange-600 dark:from-neural-cyan dark:to-blue-600 text-white dark:text-black px-8 py-4 rounded-full font-sans dark:font-mono text-medium font-medium shadow-glow dark:shadow-neon-cyan hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2">
+                Explore Dashboard
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform"/>
               </button>
               
               <div className="flex items-center gap-4">
                  <div className="flex -space-x-3">
                    {[1,2,3].map(i => (
-                     <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-gray-200 dark:bg-gray-800">
+                     <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-gray-200 dark:bg-gray-800 shadow-sm overflow-hidden">
                        <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" className="w-full h-full rounded-full" />
                      </div>
                    ))}
@@ -140,105 +139,93 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
                <div className="px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50 flex items-center gap-2">
                  <Server size={12} /> IRS READY
                </div>
-               <div className="px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-900/50 flex items-center gap-2">
-                 <Globe size={12} /> GPS SYNC ACTIVE
-               </div>
             </div>
           </div>
 
-          {/* New Hero Visual - Dashboard + Mobile Composition */}
-          <div className="relative perspective-1000 h-[600px] w-full flex items-center justify-center reveal-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-300 pointer-events-none lg:pointer-events-auto">
+          {/* New Hero Visual - Desktop + Mobile Composition */}
+          <div className="relative h-[600px] w-full flex items-center justify-center reveal-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-300 pointer-events-none lg:pointer-events-auto">
              <div className="absolute inset-0 bg-brand-orange/5 dark:bg-neural-cyan/5 blur-[100px] rounded-full pointer-events-none"></div>
              
-             {/* Laptop Screen Mockup */}
-             <div className="relative w-full max-w-[600px] bg-white dark:bg-[#0a0a0a] rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 p-2 transform rotate-y-[-5deg] rotate-x-[5deg] transition-transform duration-700 hover:rotate-y-0 hover:rotate-x-0">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gray-300 dark:bg-gray-700 rounded-b-md"></div>
+             {/* Desktop Preview Card */}
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[550px] glow-panel p-6 shadow-2xl transform rotate-[-2deg] hover:rotate-0 transition-transform duration-700 z-10">
+                {/* Mock Header */}
+                <div className="flex justify-between items-center mb-6">
+                   <div>
+                      <div className="h-2 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                      <div className="h-4 w-40 bg-gray-100 dark:bg-gray-600 rounded"></div>
+                   </div>
+                   <div className="flex gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5"></div>
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5"></div>
+                   </div>
+                </div>
                 
-                {/* Screen Content */}
-                <div className="w-full aspect-[16/10] bg-gray-50 dark:bg-[#111] rounded-lg overflow-hidden flex flex-col relative">
-                   {/* Header */}
-                   <div className="h-8 border-b border-gray-200 dark:border-gray-800 flex items-center px-4 gap-2">
-                      <div className="flex gap-1.5">
-                         <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                         <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                         <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
-                      </div>
+                {/* Mock KPI Row */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                   {[
+                     { label: 'Total Spend', val: '$2,400', color: 'text-green-500' },
+                     { label: 'Avg Price', val: '$3.45', color: 'text-orange-500' },
+                     { label: 'Distance', val: '12k km', color: 'text-blue-500' }
+                   ].map((item, i) => (
+                     <div key={i} className="p-3 bg-gray-50 dark:bg-black/40 rounded-xl border border-gray-100 dark:border-white/5">
+                        <div className="text-[10px] text-gray-400 uppercase font-bold mb-1">{item.label}</div>
+                        <div className={`text-lg font-bold ${item.color}`}>{item.val}</div>
+                     </div>
+                   ))}
+                </div>
+
+                {/* Mock Chart Area */}
+                <div className="h-40 bg-gray-50 dark:bg-black/40 rounded-xl border border-gray-100 dark:border-white/5 p-4 flex items-end justify-between gap-2 relative overflow-hidden">
+                   <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-brand-orange/5 to-transparent"></div>
+                   {[40, 65, 45, 80, 55, 90, 70, 85].map((h, i) => (
+                      <div key={i} style={{ height: `${h}%` }} className="flex-1 bg-brand-orange dark:bg-neural-cyan opacity-80 rounded-t-sm"></div>
+                   ))}
+                </div>
+             </div>
+
+             {/* Phone Mockup Overlay */}
+             <div className="absolute -bottom-0 -right-8 w-[200px] bg-black rounded-[2.5rem] p-3 shadow-2xl border-4 border-gray-800 transform rotate-[5deg] hover:rotate-0 transition-transform duration-500 z-20">
+                <div className="bg-[#111] rounded-[2rem] overflow-hidden aspect-[9/18] relative flex flex-col">
+                   {/* Mobile Header */}
+                   <div className="bg-brand-orange dark:bg-neural-cyan h-20 p-4 flex flex-col justify-end">
+                      <div className="h-2 w-16 bg-white/40 rounded mb-1"></div>
+                      <div className="h-4 w-24 bg-white rounded"></div>
                    </div>
                    
-                   {/* Dashboard Body */}
-                   <div className="flex-1 p-4 grid grid-cols-3 gap-4">
-                      {/* Sidebar */}
-                      <div className="col-span-1 bg-white dark:bg-black/40 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-white/5">
-                         <div className="h-2 w-1/2 bg-gray-200 dark:bg-gray-800 rounded mb-4"></div>
-                         <div className="h-8 w-full bg-brand-orange/10 dark:bg-neural-cyan/10 rounded-md"></div>
-                         <div className="h-8 w-full bg-transparent rounded-md"></div>
-                         <div className="h-8 w-full bg-transparent rounded-md"></div>
-                      </div>
-                      
-                      {/* Main */}
-                      <div className="col-span-2 space-y-4">
-                         {/* Stats Row */}
-                         <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-white dark:bg-black/40 p-3 rounded-lg border border-gray-100 dark:border-white/5">
-                               <div className="text-[10px] text-gray-400 mb-1">Total Fuel</div>
-                               <div className="h-6 w-16 bg-brand-orange/20 dark:bg-neural-cyan/20 rounded"></div>
-                            </div>
-                            <div className="bg-white dark:bg-black/40 p-3 rounded-lg border border-gray-100 dark:border-white/5">
-                               <div className="text-[10px] text-gray-400 mb-1">Efficiency</div>
-                               <div className="h-6 w-16 bg-green-500/20 rounded"></div>
-                            </div>
-                         </div>
-                         
-                         {/* Chart Area */}
-                         <div className="bg-white dark:bg-black/40 p-3 rounded-lg border border-gray-100 dark:border-white/5 h-32 relative overflow-hidden flex items-end justify-between px-4 pb-2">
-                            <div className="w-6 h-12 bg-gray-200 dark:bg-gray-800 rounded-t-sm"></div>
-                            <div className="w-6 h-20 bg-brand-orange dark:bg-neural-cyan rounded-t-sm opacity-80"></div>
-                            <div className="w-6 h-16 bg-gray-200 dark:bg-gray-800 rounded-t-sm"></div>
-                            <div className="w-6 h-24 bg-brand-orange dark:bg-neural-cyan rounded-t-sm opacity-80"></div>
-                            <div className="w-6 h-14 bg-gray-200 dark:bg-gray-800 rounded-t-sm"></div>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-
-             {/* Mobile Phone Overlay */}
-             <div className="absolute -bottom-10 -right-4 w-[160px] bg-black rounded-[2rem] p-2 shadow-2xl border border-gray-800 transform rotate-[-5deg] hover:rotate-0 transition-transform duration-500">
-                <div className="bg-[#111] rounded-[1.7rem] overflow-hidden aspect-[9/19] relative">
-                   {/* Mobile Header */}
-                   <div className="bg-brand-orange dark:bg-neural-cyan h-24 p-4 flex flex-col justify-end">
-                      <div className="w-8 h-8 rounded-full bg-white/20 mb-2"></div>
-                      <div className="h-2 w-20 bg-white/40 rounded"></div>
-                   </div>
                    {/* Mobile List */}
-                   <div className="p-3 space-y-2">
-                      <div className="h-12 bg-white/10 rounded-xl w-full"></div>
-                      <div className="h-12 bg-white/10 rounded-xl w-full"></div>
-                      <div className="h-12 bg-white/10 rounded-xl w-full"></div>
+                   <div className="p-3 space-y-3 flex-1">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-3 p-2 bg-white/5 rounded-xl border border-white/5">
+                           <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                              <Fuel size={12} className="text-white"/>
+                           </div>
+                           <div className="flex-1">
+                              <div className="h-2 w-12 bg-white/20 rounded mb-1"></div>
+                              <div className="h-2 w-8 bg-white/10 rounded"></div>
+                           </div>
+                           <div className="h-3 w-8 bg-brand-orange dark:bg-neural-cyan rounded-md opacity-80"></div>
+                        </div>
+                      ))}
                    </div>
-                   <div className="absolute bottom-4 right-4 w-10 h-10 bg-brand-orange dark:bg-neural-cyan rounded-full shadow-lg flex items-center justify-center text-white">
-                      <Plus size={16} strokeWidth={3} className="text-white dark:text-black"/>
+                   
+                   {/* FAB */}
+                   <div className="absolute bottom-6 right-4 w-12 h-12 bg-brand-orange dark:bg-neural-cyan rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-transform">
+                      <Plus size={20} strokeWidth={3} className="text-white dark:text-black"/>
                    </div>
                 </div>
              </div>
-
           </div>
-
         </div>
 
-        {/* Features Grid - Enhanced Visibility in Light Mode */}
+        {/* Features Grid */}
         <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
            {features.map((feature, i) => (
              <div 
                key={i} 
-               className={`glass-panel reveal-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out p-8 rounded-3xl bg-white dark:bg-white/5 relative overflow-hidden group`}
+               className={`glow-panel reveal-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out p-8 rounded-3xl group`}
                style={{ transitionDelay: `${i * 100}ms` }}
              >
-                {/* Background Decoration - Glow Behind Icon */}
-                <div className="absolute top-10 left-8 w-20 h-20 bg-brand-orange/20 rounded-full blur-2xl opacity-100 dark:opacity-0 transition-opacity"></div>
-                <div className="absolute top-10 left-8 w-20 h-20 bg-neural-cyan/20 rounded-full blur-2xl opacity-0 dark:opacity-100 transition-opacity"></div>
-
-                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 shadow-orange-glow dark:shadow-cyan-glow flex items-center justify-center mb-6 group-hover:scale-110 transition-transform relative z-10 border border-orange-100 dark:border-white/10 text-brand-orange dark:text-neural-cyan">
+                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-[#1a1a1a] icon-halo flex items-center justify-center mb-6 group-hover:scale-110 transition-transform relative z-10 border border-orange-50 dark:border-white/5 text-brand-orange dark:text-neural-cyan">
                   {feature.icon}
                 </div>
                 
@@ -247,7 +234,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">{feature.desc}</p>
                   
                   {expandedCard === i ? (
-                     <div className="animate-fade-in-up text-xs text-gray-500 dark:text-gray-300 mb-4 bg-gray-50 dark:bg-white/5 p-3 rounded-xl border border-gray-100 dark:border-white/5">
+                     <div className="animate-fade-in-up text-xs text-gray-500 dark:text-gray-300 mb-4 bg-gray-50 dark:bg-black/30 p-3 rounded-xl border border-gray-100 dark:border-white/5">
                         {feature.moreInfo}
                      </div>
                   ) : null}
@@ -276,21 +263,3 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
     </div>
   );
 };
-function Plus({ size, className, strokeWidth }: { size: number, className?: string, strokeWidth?: number }) {
-  return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth={strokeWidth || 2} 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
-    </svg>
-  )
-}

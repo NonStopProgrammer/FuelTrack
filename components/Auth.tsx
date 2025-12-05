@@ -119,7 +119,7 @@ export const Auth: React.FC<AuthProps> = ({ mode, onNavigate }) => {
             </div>
           </div>
 
-          <div className="glass-panel p-8 md:p-10 rounded-3xl shadow-2xl bg-white/80 dark:bg-black/40 border border-gray-100 dark:border-glass-border backdrop-blur-xl transition-all duration-500">
+          <div className="glow-panel p-8 md:p-10 backdrop-blur-xl transition-all duration-500">
             <h2 className="text-2xl font-bold text-center mb-2 text-gray-900 dark:text-white font-serif dark:font-mono">
               {mode === 'login' ? 'Welcome Back' : 'Initialize Fleet Account'}
             </h2>

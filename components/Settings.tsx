@@ -54,7 +54,7 @@ export const Settings: React.FC<SettingsProps> = ({ user, refreshProfile, isDark
       <h2 className="text-2xl font-bold font-serif dark:font-mono text-gray-900 dark:text-white mb-6">Account Settings</h2>
 
       {/* Theme Card */}
-      <div className="glass-panel p-6 rounded-2xl bg-white dark:bg-black/40 border border-gray-100 dark:border-glass-border shadow-soft dark:shadow-none mb-8 flex justify-between items-center">
+      <div className="glow-panel p-6 mb-8 flex justify-between items-center">
         <div>
            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Appearance</h3>
            <p className="text-sm text-gray-500 dark:text-gray-400">Customize your dashboard experience.</p>
@@ -68,7 +68,7 @@ export const Settings: React.FC<SettingsProps> = ({ user, refreshProfile, isDark
         </button>
       </div>
 
-      <div className="glass-panel p-8 rounded-2xl bg-white dark:bg-black/40 border border-gray-100 dark:border-glass-border shadow-soft dark:shadow-none">
+      <div className="glow-panel p-8">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Personal Information</h3>
         
         {msg && (

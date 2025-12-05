@@ -93,7 +93,7 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
         </button>
       </div>
 
-      <div className="glass-panel rounded-2xl overflow-hidden bg-white dark:bg-black/40 border border-gray-100 dark:border-glass-border shadow-soft dark:shadow-none">
+      <div className="glow-panel rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5">
