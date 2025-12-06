@@ -8,17 +8,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-              display: ['Sora', 'sans-serif'],
+              sans: ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
+              serif: ['Fraunces', 'Playfair Display', 'serif'],
+              mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+              display: ['Sora', 'Manrope', 'sans-serif'],
             },
             colors: {
               brand: {
@@ -211,13 +211,27 @@
 
       /* Button Micro-interactions */
       .btn-press {
-        transition: transform var(--dur-fast) var(--easing-sharp), box-shadow var(--dur-fast);
+        transition: transform var(--dur-fast) var(--easing-sharp), box-shadow var(--dur-fast), background-color var(--dur-fast), color var(--dur-fast);
       }
       .btn-press:active {
         transform: scale(0.96);
       }
       .btn-press:hover {
         transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+      }
+      .btn-press:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25), 0 8px 18px rgba(0,0,0,0.08);
+      }
+      .dark .btn-press:focus-visible {
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.35), 0 8px 24px rgba(0,0,0,0.5);
+      }
+
+      /* Sidebar transition */
+      .sidebar {
+        transition: width var(--dur-medium) var(--easing-soft), transform var(--dur-medium) var(--easing-soft);
+        will-change: width, transform;
       }
 
       /* List/Table Row Interactions */
@@ -367,7 +381,8 @@
     "chart.js/auto": "https://esm.sh/chart.js@4.4.1/auto",
     "react-chartjs-2": "https://esm.sh/react-chartjs-2@5.2.0?deps=react@18.2.0,chart.js@4.4.1",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "chart.js/": "https://aistudiocdn.com/chart.js@^4.5.1/"
+    "chart.js/": "https://aistudiocdn.com/chart.js@^4.5.1/",
+    "d3": "https://esm.sh/d3@7.9.0"
   }
 }
 </script>

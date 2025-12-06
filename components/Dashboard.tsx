@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  LayoutDashboard, Car, History, Settings as SettingsIcon, LogOut, 
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  LayoutDashboard, Car, History, Settings as SettingsIcon, LogOut,
   Plus, Fuel, Calendar, DollarSign, Gauge, ArrowUpRight, ChevronRight,
-  TrendingDown, TrendingUp, BarChart3, IndianRupee, Wallet
+  TrendingDown, TrendingUp, BarChart3, IndianRupee, Wallet,
+  Menu, X, ChevronDown, Sun, Moon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Vehicle, FuelLog, DashboardStats } from '../types';
 import { VehicleManager } from './VehicleManager';
 import { FuelLogManager } from './FuelLogManager';
-import { Settings } from './Settings';
 import { Analytics } from './Analytics';
+import { Settings } from './Settings';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -25,7 +26,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
   const [logs, setLogs] = useState<FuelLog[]>([]);
   const [stats, setStats] = useState<DashboardStats>({ avgMpg: 0, totalCost: 0, totalDistance: 0, totalFuel: 0 });
   const [loading, setLoading] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const [avatarIndex, setAvatarIndex] = useState<number>(0);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
+  const avatarSeeds = ['Bolt','Nova','Rider','Atlas','Pixel','Orbit','Comet','Blaze','Zen','Echo'];
+  const avatarSources = useMemo(
+    () => avatarSeeds.map(seed => `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundType=gradientLinear&radius=50`),
+    []
+  );
+  useEffect(() => {
+    const saved = localStorage.getItem('ft_avatar_index');
+    if (saved !== null) setAvatarIndex(parseInt(saved, 10));
+  }, []);
+  const handleSelectAvatar = (i: number) => {
+    setAvatarIndex(i);
+    localStorage.setItem('ft_avatar_index', String(i));
+    setShowAvatarPicker(false);
+    setProfileOpen(false);
+  };
+  
   // --- Scroll Reveal Observer ---
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -35,13 +59,37 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
         }
       });
     }, { threshold: 0.1, rootMargin: '20px' });
-
+ 
     const elements = document.querySelectorAll('.reveal-on-scroll');
     elements.forEach(el => observer.observe(el));
-
+ 
     return () => observer.disconnect();
   }, [activeTab, vehicles, logs]); // Re-run when content changes
 
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, []);
+
+  // Close overlays with Escape for accessibility
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+        setProfileOpen(false);
+        setShowSettingsModal(false);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+ 
   useEffect(() => {
     if (sessionEmail) {
       fetchUserData();
@@ -148,15 +196,54 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
   // Icon selector based on currency
   const CostIcon = user?.currency === 'INR' ? IndianRupee : DollarSign;
 
+  // Current month spend (YYYY-MM match) used on Overview stats
+  const currentMonthSpend = useMemo(() => {
+    const key = new Date().toISOString().slice(0, 7);
+    return logs.reduce((acc, l) => (String(l.ts).slice(0, 7) === key ? acc + (l.total_cost || 0) : acc), 0);
+  }, [logs]);
+
   return (
     <div className="min-h-screen bg-brand-light dark:bg-obsidian transition-colors duration-500 flex flex-col md:flex-row font-sans text-gray-900 dark:text-white">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white dark:bg-matte-dark border-r border-gray-200 dark:border-glass-border p-6 flex flex-col z-20 shadow-light-md dark:shadow-none">
-        <div className="flex items-center gap-2 mb-10">
-          <div className="bg-gradient-to-br from-brand-orange to-brand-darkOrange dark:from-neural-cyan dark:to-blue-600 p-1.5 rounded-lg text-white dark:text-black shadow-lg dark:shadow-neon-cyan">
-             <Fuel size={20} />
+      {/* Sidebar + Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 md:hidden z-20"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+      <aside
+        className={`sidebar ${mobileOpen ? 'fixed inset-y-0 left-0 w-72' : 'hidden'} md:static md:block ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'} w-72 bg-white dark:bg-matte-dark border-r border-gray-200 dark:border-glass-border p-4 md:p-6 flex flex-col z-30 shadow-light-md dark:shadow-none relative`}
+      >
+        {/* Mid-edge collapse/expand handle (desktop) */}
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 h-12 w-7 rounded-r-xl glass border border-gray-200 dark:border-white/10 items-center justify-center hover:bg-white/60 dark:hover:bg-white/10 transition-colors"
+          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={sidebarCollapsed ? 'Expand' : 'Collapse'}
+        >
+          <ChevronRight size={16} className={`${sidebarCollapsed ? '' : 'rotate-180'} transition-transform`} />
+        </button>
+
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-br from-brand-orange to-brand-darkOrange dark:from-neural-cyan dark:to-blue-600 p-1.5 rounded-lg text-white dark:text-black shadow-lg dark:shadow-neon-cyan">
+              <Fuel size={20} />
+            </div>
+            {!sidebarCollapsed && (
+              <span className="font-bold text-lg font-serif dark:font-mono tracking-tight text-gray-900 dark:text-white">
+                FuelTrack
+              </span>
+            )}
           </div>
-          <span className="font-bold text-lg font-serif dark:font-mono tracking-tight text-gray-900 dark:text-white">FuelTrack</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="md:hidden p-2 rounded-lg bg-gray-50 dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 border border-gray-200 dark:border-white/10 btn-press"
+              aria-label="Close sidebar"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -165,31 +252,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
             { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
             { id: 'vehicles', label: 'Vehicles', icon: <Car size={18} /> },
             { id: 'history', label: 'Log History', icon: <History size={18} /> },
-            { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all btn-press ${
+              onClick={() => { setActiveTab(item.id); setMobileOpen(false); }}
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center gap-0 px-2' : 'gap-3 px-4'} py-3 rounded-xl text-sm font-medium transition-all btn-press ${
                 activeTab === item.id
                   ? 'bg-brand-orange/10 dark:bg-neural-cyan/10 text-brand-orange dark:text-neural-cyan shadow-sm border border-brand-orange/5 dark:border-neural-cyan/5'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
               }`}
+              aria-label={item.label}
             >
               {item.icon}
-              {item.label}
+              {!sidebarCollapsed && <span>{item.label}</span>}
             </button>
           ))}
         </nav>
 
-        <button 
-          onClick={onLogout}
-          className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-500 hover:text-red-500 transition-colors mt-auto btn-press"
-        >
-          <LogOut size={18} />
-          Sign Out
-        </button>
+        {/* Sign out moved to profile menu (top-right) */}
       </aside>
+
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto relative h-screen scroll-smooth">
@@ -202,25 +284,123 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
         <div className="relative z-10 p-6 md:p-10 max-w-7xl mx-auto pb-20">
           
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 reveal-on-scroll">
-            <div>
-              <h1 className="text-3xl font-bold font-serif dark:font-mono mb-2 text-gray-900 dark:text-white capitalize">
-                {activeTab.replace('-', ' ')}
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
-                {user ? `Welcome back, ${user.first_name || 'Pilot'}.` : 'Loading profile...'}
-              </p>
+          <div className="glow-panel p-4 flex items-center justify-between gap-4 mb-10 reveal-on-scroll relative z-40">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMobileOpen(true)}
+                className="md:hidden p-2 rounded-lg bg-white/70 dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white btn-press"
+                aria-label="Open sidebar"
+              >
+                <Menu size={18} />
+              </button>
+              <div>
+                <h1 className="text-3xl font-bold font-display text-gray-900 dark:text-white capitalize">
+                  {activeTab.replace('-', ' ')}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 text-sm hidden sm:block">
+                  {user ? `Welcome back, ${user.first_name || 'Pilot'}.` : 'Loading profile...'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-xl glass btn-press"
+                aria-label="Toggle theme"
+                title={isDark ? 'Switch to Light' : 'Switch to Dark'}
+              >
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+
+              <div ref={profileRef} className="relative z-50">
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl glass btn-press"
+                  aria-label="User menu"
+                >
+                  <img src={avatarSources[avatarIndex]} alt="Avatar" className="w-8 h-8 rounded-full" />
+                  <div className="hidden md:block text-left">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">{user?.first_name || 'User'}</div>
+                    <div className="text-[10px] text-gray-500 dark:text-gray-400">{isDark ? 'Dark' : 'Light'} mode</div>
+                  </div>
+                  <ChevronDown size={16} className="text-gray-500 dark:text-gray-400" />
+                </button>
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-72 glow-panel p-2 z-[60]">
+                    <button
+                      onClick={() => setShowAvatarPicker(!showAvatarPicker)}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 text-sm btn-press"
+                    >
+                      <span className="font-medium">Change Avatar</span>
+                    </button>
+                    {showAvatarPicker && (
+                      <div className="grid grid-cols-5 gap-2 p-2">
+                        {avatarSources.map((src, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleSelectAvatar(i)}
+                            className={`p-0.5 rounded-full border ${avatarIndex === i ? 'border-brand-orange dark:border-neural-cyan' : 'border-transparent'} hover:border-brand-orange/60 dark:hover:border-neural-cyan/60 btn-press`}
+                            aria-label={`Select avatar ${i + 1}`}
+                          >
+                            <img src={src} alt={`Avatar ${i + 1}`} className="w-9 h-9 rounded-full" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <button
+                      onClick={() => { setShowSettingsModal(true); setProfileOpen(false); setShowAvatarPicker(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 text-sm btn-press"
+                    >
+                      <SettingsIcon size={16} />
+                      <span>Profile & Settings</span>
+                    </button>
+                    <div className="my-1 border-t border-gray-100 dark:border-white/10"></div>
+                    <button
+                      onClick={onLogout}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-sm text-red-600 dark:text-red-400 btn-press"
+                    >
+                      <LogOut size={16} />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {activeTab === 'overview' && (
+          {showSettingsModal && (
+            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-md" onClick={() => setShowSettingsModal(false)}></div>
+              <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto glow-panel p-2 md:p-4 modal-enter">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-white/10">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Profile & Settings</h3>
+                  <button onClick={() => setShowSettingsModal(false)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 btn-press" aria-label="Close">
+                    <X size={18} />
+                  </button>
+                </div>
+                <div className="p-4">
+                  <Settings
+                    user={user}
+                    refreshProfile={fetchUserData}
+                    isDark={isDark}
+                    toggleTheme={toggleTheme}
+                    onLogout={onLogout}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+           {activeTab === 'overview' && (
             <>
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 {[
                   { label: 'Avg Efficiency', value: stats.avgMpg, unit: 'km/L', icon: <Gauge className="text-blue-500" />, change: '+2.1%' },
                   { label: 'Total Spend', value: stats.totalCost, unit: '', icon: <CostIcon className="text-green-500" />, change: 'Total', prefix: true },
-                  { label: 'Fleet Mileage', value: stats.totalDistance.toLocaleString(), unit: 'km', icon: <History className="text-purple-500" />, change: 'Tracked' },
+                  { label: 'Monthly Spend', value: parseFloat(currentMonthSpend.toFixed(0)), unit: '', icon: <Wallet className="text-emerald-500" />, change: 'This Month', prefix: true },
                   { label: 'Fuel Consumed', value: stats.totalFuel, unit: 'L', icon: <Fuel className="text-orange-500" />, change: 'Since Start' },
                 ].map((stat, i) => (
                   <div key={i} className="glow-panel p-6 reveal-on-scroll card-hover icon-halo-anim" style={{transitionDelay: `${i*60}ms`}}>
@@ -276,7 +456,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
                       
                       {/* Name & Org */}
                       <div>
-                         <h3 className="text-xl font-bold font-serif dark:font-mono text-gray-900 dark:text-white leading-tight">
+                         <h3 className="text-xl font-bold font-display text-gray-900 dark:text-white leading-tight">
                             {user?.first_name} {user?.last_name}
                          </h3>
                          <div className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-brand-orange/10 text-brand-orange dark:bg-neural-cyan/10 dark:text-neural-cyan tracking-wider">
@@ -317,15 +497,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
              <FuelLogManager logs={logs} vehicles={vehicles} refreshData={refreshData} userEmail={user.email} />
           )}
 
-          {activeTab === 'settings' && user && (
-            <Settings 
-              user={user} 
-              refreshProfile={fetchUserData} 
-              isDark={isDark} 
-              toggleTheme={toggleTheme} 
-              onLogout={onLogout}
-            />
-          )}
 
         </div>
       </main>

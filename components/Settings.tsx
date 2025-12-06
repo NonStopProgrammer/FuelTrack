@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase, hashPassword } from '../lib/supabase';
-import { User, Phone, Building2, Save, Sun, Moon, Database, Trash2, Lock, AlertTriangle, X } from 'lucide-react';
+import { User, Phone, Building2, Save, Database, Trash2, Lock, AlertTriangle, X } from 'lucide-react';
 
 interface SettingsProps {
   user: any;
@@ -204,20 +204,6 @@ export const Settings: React.FC<SettingsProps> = ({ user, refreshProfile, isDark
         </div>
       )}
 
-      {/* Theme Card */}
-      <div className="glow-panel p-6 mb-8 flex justify-between items-center card-hover">
-        <div>
-           <h3 className="text-lg font-bold text-gray-900 dark:text-white">Appearance</h3>
-           <p className="text-sm text-gray-500 dark:text-gray-400">Customize your dashboard experience.</p>
-        </div>
-        <button 
-          onClick={toggleTheme}
-          className="flex items-center gap-3 px-5 py-3 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors btn-press"
-        >
-          {isDark ? <Sun size={20} className="text-white"/> : <Moon size={20} className="text-black"/>}
-          <span className="font-medium text-sm text-gray-900 dark:text-white">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-        </button>
-      </div>
 
       {/* Personal Info */}
       <div className="glow-panel p-8 card-hover">

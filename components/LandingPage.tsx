@@ -68,7 +68,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 pt-6 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex items-center justify-between glass rounded-2xl px-4 py-3 shadow-light-md">
            <div className="flex items-center gap-2">
              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-orange to-brand-darkOrange dark:from-neural-cyan dark:to-blue-600 flex items-center justify-center text-white shadow-lg">
                <Fuel size={20} fill="currentColor" className="opacity-90" />
@@ -100,7 +100,7 @@ export const LandingPage: React.FC<LandingProps> = ({ onNavigate, isDark, toggle
       </nav>
       
       <main className="relative z-10 pt-32 pb-20 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-20 items-center min-h-[70vh]">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-20 items-center min-h-[70vh] glow-panel p-6 md:p-10 rounded-3xl">
           
           {/* Hero Copy */}
           <div className="flex-1 reveal-on-scroll delay-100 lg:max-w-xl text-center lg:text-left z-20">

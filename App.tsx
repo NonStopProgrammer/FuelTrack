@@ -6,7 +6,7 @@ import { PrivacyTerms } from './components/PrivacyTerms';
 import { ViewState } from './types';
 
 function App() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [currentView, setCurrentView] = useState<ViewState>('landing');
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
 
