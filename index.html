@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -18,6 +18,7 @@
               sans: ['Inter', 'sans-serif'],
               serif: ['Playfair Display', 'serif'],
               mono: ['JetBrains Mono', 'monospace'],
+              display: ['Sora', 'sans-serif'],
             },
             colors: {
               brand: {
@@ -44,23 +45,63 @@
             },
             animation: {
               'fade-in-up': 'fadeInUp 0.8s cubic-bezier(.2,.9,.3,1) forwards',
+              'fade-in': 'fadeIn 0.6s ease-out forwards',
+              'slide-in-right': 'slideInRight 0.5s cubic-bezier(.2,.9,.3,1) forwards',
+              'slide-in-left': 'slideInLeft 0.5s cubic-bezier(.2,.9,.3,1) forwards',
+              'scale-in': 'scaleIn 0.4s cubic-bezier(.2,.9,.3,1) forwards',
               'float': 'float 6s ease-in-out infinite',
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'shimmer': 'shimmer 2s linear infinite',
+              'glow': 'glow 2s ease-in-out infinite alternate',
+              'bounce-soft': 'bounceSoft 2s ease-in-out infinite',
             },
             keyframes: {
               fadeInUp: {
                 '0%': { opacity: '0', transform: 'translateY(20px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideInRight: {
+                '0%': { opacity: '0', transform: 'translateX(30px)' },
+                '100%': { opacity: '1', transform: 'translateX(0)' },
+              },
+              slideInLeft: {
+                '0%': { opacity: '0', transform: 'translateX(-30px)' },
+                '100%': { opacity: '1', transform: 'translateX(0)' },
+              },
+              scaleIn: {
+                '0%': { opacity: '0', transform: 'scale(0.9)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
+              },
               float: {
                 '0%, 100%': { transform: 'translateY(0)' },
                 '50%': { transform: 'translateY(-10px)' },
+              },
+              shimmer: {
+                '0%': { backgroundPosition: '-1000px 0' },
+                '100%': { backgroundPosition: '1000px 0' },
+              },
+              glow: {
+                '0%': { boxShadow: '0 0 20px rgba(249, 115, 22, 0.3)' },
+                '100%': { boxShadow: '0 0 40px rgba(249, 115, 22, 0.6)' },
+              },
+              bounceSoft: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-5px)' },
               }
             },
             backgroundImage: {
               'noise': "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\" opacity=\"0.05\"/%3E%3C/svg%3E')",
               'mesh-gradient': 'radial-gradient(at 0% 0%, rgba(34, 211, 238, 0.15) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.15) 0px, transparent 50%)',
-              'mesh-gradient-light': 'radial-gradient(circle at 100% 0%, rgba(255, 237, 213, 0.6) 0%, rgba(255, 255, 255, 0) 40%)', 
+              'mesh-gradient-light': 'radial-gradient(circle at 100% 0%, rgba(255, 237, 213, 0.6) 0%, rgba(255, 255, 255, 0) 40%)',
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+              'shimmer': 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+            },
+            backdropBlur: {
+              xs: '2px',
             }
           }
         }
@@ -212,6 +253,106 @@
       .modal-enter {
         animation: scaleIn var(--dur-medium) var(--easing-soft) forwards;
       }
+
+      /* Premium Glassmorphism */
+      .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+      .dark .glass {
+        background: rgba(17, 18, 19, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      /* Shimmer Effect */
+      .shimmer {
+        position: relative;
+        overflow: hidden;
+      }
+      .shimmer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: shimmer 2s infinite;
+      }
+      .dark .shimmer::before {
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      }
+
+      /* Magnetic Button Effect */
+      @keyframes magneticPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      .magnetic:hover {
+        animation: magneticPulse 0.6s ease-in-out;
+      }
+
+      /* Text Gradient */
+      .text-gradient {
+        background: linear-gradient(135deg, #F97316, #EA580C);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .dark .text-gradient {
+        background: linear-gradient(135deg, #22d3ee, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* Smooth Scroll */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.05);
+      }
+      .dark ::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 4px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #F97316;
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background: #22d3ee;
+      }
+
+      /* Glow on Hover */
+      .glow-on-hover {
+        transition: filter var(--dur-medium);
+      }
+      .glow-on-hover:hover {
+        filter: drop-shadow(0 0 20px rgba(249, 115, 22, 0.4));
+      }
+      .dark .glow-on-hover:hover {
+        filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.4));
+      }
+
+      /* Depth Layers */
+      .layer-1 { z-index: 10; }
+      .layer-2 { z-index: 20; }
+      .layer-3 { z-index: 30; }
     </style>
   <script type="importmap">
 {
@@ -233,5 +374,6 @@
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

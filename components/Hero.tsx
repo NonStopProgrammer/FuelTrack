@@ -1,7 +1,12 @@
 import React from 'react';
 import { ArrowRight, Star, Cloud, Database, Slack } from 'lucide-react';
+import { ViewState } from '../types';
 
-export const Hero: React.FC = () => {
+interface HeroProps {
+  onNavigate?: (view: ViewState) => void;
+}
+
+export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   return (
     <section className="relative pt-32 pb-20 overflow-hidden bg-white">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -18,7 +23,10 @@ export const Hero: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-12">
-            <button className="bg-gradient-to-r from-brand-orange to-orange-400 text-white px-8 py-4 rounded-full font-medium shadow-glow hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 group">
+            <button 
+              onClick={() => onNavigate?.('signup')}
+              className="bg-gradient-to-r from-brand-orange to-orange-400 text-white px-8 py-4 rounded-full font-medium shadow-glow hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 group"
+            >
               Sign up free
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>

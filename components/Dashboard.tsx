@@ -15,18 +15,16 @@ interface DashboardProps {
   onLogout: () => void;
   isDark: boolean;
   toggleTheme: () => void;
+  sessionEmail: string | null;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTheme }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTheme, sessionEmail }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [user, setUser] = useState<any>(null);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [logs, setLogs] = useState<FuelLog[]>([]);
   const [stats, setStats] = useState<DashboardStats>({ avgMpg: 0, totalCost: 0, totalDistance: 0, totalFuel: 0 });
   const [loading, setLoading] = useState(true);
-
-  // Use the email used in auth as a session identifier for this simplified demo
-  const [userEmail, setUserEmail] = useState<string>(''); 
 
   // --- Scroll Reveal Observer ---
   useEffect(() => {
@@ -45,25 +43,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
   }, [activeTab, vehicles, logs]); // Re-run when content changes
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    if (sessionEmail) {
+      fetchUserData();
+    }
+  }, [sessionEmail]);
 
   const fetchUserData = async () => {
     setLoading(true);
     try {
-      const { data: users, error } = await supabase
+      if (!sessionEmail) return;
+
+      // Correctly fetch the logged-in user by email
+      const { data: userData, error } = await supabase
         .from('app_users')
         .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1);
+        .eq('email', sessionEmail)
+        .single();
 
-      if (users && users.length > 0) {
-        setUser(users[0]);
-        setUserEmail(users[0].email);
-        await fetchData(users[0].id);
+      if (error) throw error;
+
+      if (userData) {
+        setUser(userData);
+        await fetchData(userData.id);
       }
     } catch (e) {
-      console.error(e);
+      console.error("Error fetching user data:", e);
     } finally {
       setLoading(false);
     }
@@ -116,7 +120,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
     
     // Logic: Distance = Last Odometer - First Odometer
     // Fuel Consumed = Sum of all liters *except* the very first fill (which establishes the baseline).
-    // This assumes the user refills roughly to the same point (full) or we track lifetime usage.
     const minOdo = sorted[0].odometer;
     const maxOdo = sorted[sorted.length - 1].odometer;
     const totalDistance = maxOdo - minOdo;
@@ -136,8 +139,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
 
   const refreshData = () => {
     if (user) {
-      fetchUserData(); // Refresh profile too
-      fetchData(user.id);
+      fetchUserData(); // Refresh profile and data
     }
   };
 
@@ -307,16 +309,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ onLogout, isDark, toggleTh
              <Analytics logs={logs} vehicles={vehicles} currency={user?.currency || 'INR'} />
           )}
 
-          {activeTab === 'vehicles' && (
-             <VehicleManager vehicles={vehicles} refreshData={refreshData} userEmail={userEmail} />
+          {activeTab === 'vehicles' && user && (
+             <VehicleManager vehicles={vehicles} refreshData={refreshData} userEmail={user.email} />
           )}
 
-          {activeTab === 'history' && (
-             <FuelLogManager logs={logs} vehicles={vehicles} refreshData={refreshData} userEmail={userEmail} />
+          {activeTab === 'history' && user && (
+             <FuelLogManager logs={logs} vehicles={vehicles} refreshData={refreshData} userEmail={user.email} />
           )}
 
           {activeTab === 'settings' && user && (
-            <Settings user={user} refreshProfile={fetchUserData} isDark={isDark} toggleTheme={toggleTheme} />
+            <Settings 
+              user={user} 
+              refreshProfile={fetchUserData} 
+              isDark={isDark} 
+              toggleTheme={toggleTheme} 
+              onLogout={onLogout}
+            />
           )}
 
         </div>

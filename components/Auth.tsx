@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewState } from '../types';
 import { Fuel, ArrowLeft, Lock, Mail, User, Phone, Building2 } from 'lucide-react';
 import { supabase, hashPassword } from '../lib/supabase';
@@ -6,9 +6,10 @@ import { supabase, hashPassword } from '../lib/supabase';
 interface AuthProps {
   mode: 'login' | 'signup';
   onNavigate: (view: ViewState) => void;
+  onLogin?: (email: string) => void;
 }
 
-export const Auth: React.FC<AuthProps> = ({ mode, onNavigate }) => {
+export const Auth: React.FC<AuthProps> = ({ mode, onNavigate, onLogin }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,6 +21,13 @@ export const Auth: React.FC<AuthProps> = ({ mode, onNavigate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Clear messages when mode changes
+  useEffect(() => {
+    setError(null);
+    setSuccessMsg(null);
+    setFormData(prev => ({ ...prev, password: '' })); // Optional: clear password on switch
+  }, [mode]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -79,15 +87,15 @@ export const Auth: React.FC<AuthProps> = ({ mode, onNavigate }) => {
 
         if (!user) {
           // User not found
-          throw new Error('Invalid email or password');
+          throw new Error('Account does not exist. Please Sign Up.');
         }
 
         if (user.password_hash === hashedPassword) {
-          // Pass user data if needed, for now just navigate
+          if (onLogin) onLogin(user.email);
           onNavigate('dashboard');
         } else {
           // Hash mismatch
-          throw new Error('Invalid email or password');
+          throw new Error('Invalid password.');
         }
       }
     } catch (err: any) {
@@ -257,8 +265,6 @@ export const Auth: React.FC<AuthProps> = ({ mode, onNavigate }) => {
               <button 
                 onClick={() => {
                   onNavigate(mode === 'login' ? 'signup' : 'login');
-                  setError(null);
-                  setSuccessMsg(null);
                 }}
                 className="text-brand-orange dark:text-neural-cyan font-bold hover:underline"
               >

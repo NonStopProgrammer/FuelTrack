@@ -39,7 +39,8 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
     setFormData(newData);
   };
 
-  const handleEdit = (log: FuelLog) => {
+  const handleEdit = (e: React.MouseEvent, log: FuelLog) => {
+    e.stopPropagation();
     setEditingId(log.id);
     setFormData({
       vehicle_id: log.vehicle_id,
@@ -54,7 +55,8 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this entry? This will affect your stats.')) return;
     setLoading(true);
     const { error } = await supabase.from('fuel_entries').delete().eq('id', id);
@@ -68,7 +70,11 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
     setLoading(true);
 
     const { data: userData } = await supabase.from('app_users').select('id').eq('email', userEmail).single();
-    if (!userData) return;
+    if (!userData) {
+      alert("Session Error: Could not verify user.");
+      setLoading(false);
+      return;
+    }
 
     try {
       if (editingId) {
@@ -192,10 +198,18 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
                   <td className="px-6 py-4 font-mono font-bold text-gray-900 dark:text-white">₹{log.total_cost}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(log)} className="p-1.5 hover:bg-gray-200 dark:hover:bg-white/20 rounded text-gray-500 dark:text-gray-400">
+                      <button 
+                        type="button"
+                        onClick={(e) => handleEdit(e, log)} 
+                        className="p-1.5 hover:bg-gray-200 dark:hover:bg-white/20 rounded text-gray-500 dark:text-gray-400 btn-press"
+                      >
                         <Edit2 size={14} />
                       </button>
-                      <button onClick={() => handleDelete(log.id)} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-500">
+                      <button 
+                        type="button"
+                        onClick={(e) => handleDelete(e, log.id)} 
+                        className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-500 btn-press"
+                      >
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -217,7 +231,7 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm transition-opacity" onClick={() => setShowModal(false)}></div>
           
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl p-8 border border-gray-100 dark:border-glass-border modal-enter max-h-[85vh] overflow-y-auto flex flex-col my-auto">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl p-8 border border-gray-100 dark:border-glass-border modal-enter max-h-[85vh] overflow-y-auto flex flex-col">
             <div className="flex justify-between items-center mb-6 shrink-0">
                <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-serif dark:font-mono">
                  {editingId ? 'Edit Entry' : 'Log Fuel Entry'}
@@ -242,8 +256,15 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
                  <div>
                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Date</label>
                    <div className="relative">
-                      <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
-                      <input required type="date" value={formData.ts} onChange={e => setFormData({...formData, ts: e.target.value})} className="w-full pl-10 p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-orange dark:focus:ring-neural-cyan text-gray-900 dark:text-white"/>
+                      {/* Using native date input which triggers calendar on modern browsers */}
+                      <input 
+                        required 
+                        type="date" 
+                        value={formData.ts} 
+                        onChange={e => setFormData({...formData, ts: e.target.value})} 
+                        className="w-full pl-4 p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-orange dark:focus:ring-neural-cyan text-gray-900 dark:text-white cursor-pointer"
+                        style={{ colorScheme: 'light dark' }}
+                      />
                    </div>
                  </div>
                  <div>

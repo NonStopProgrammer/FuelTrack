@@ -1,7 +1,12 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { ViewState } from '../types';
 
-export const FooterCTA: React.FC = () => {
+interface FooterCTAProps {
+  onNavigate?: (view: ViewState) => void;
+}
+
+export const FooterCTA: React.FC<FooterCTAProps> = ({ onNavigate }) => {
   return (
     <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -30,7 +35,10 @@ export const FooterCTA: React.FC = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="bg-white text-gray-900 px-8 py-3.5 rounded-full font-medium hover:bg-gray-100 transition-colors flex items-center gap-2">
+          <button 
+            onClick={() => onNavigate?.('signup')}
+            className="bg-white text-gray-900 px-8 py-3.5 rounded-full font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
+          >
             Start sandbox workspace
             <ArrowUpRight size={16} />
           </button>

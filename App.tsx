@@ -8,6 +8,7 @@ import { ViewState } from './types';
 function App() {
   const [isDark, setIsDark] = useState(false);
   const [currentView, setCurrentView] = useState<ViewState>('landing');
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (isDark) {
@@ -19,14 +20,38 @@ function App() {
     }
   }, [isDark]);
 
+  const handleLogout = () => {
+    setSessionEmail(null);
+    setCurrentView('landing');
+  };
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard onLogout={() => setCurrentView('landing')} isDark={isDark} toggleTheme={() => setIsDark(!isDark)} />;
+        return (
+          <Dashboard 
+            onLogout={handleLogout} 
+            isDark={isDark} 
+            toggleTheme={() => setIsDark(!isDark)} 
+            sessionEmail={sessionEmail}
+          />
+        );
       case 'login':
-        return <Auth mode="login" onNavigate={(view) => setCurrentView(view)} />;
+        return (
+          <Auth 
+            mode="login" 
+            onNavigate={(view) => setCurrentView(view)} 
+            onLogin={(email) => setSessionEmail(email)}
+          />
+        );
       case 'signup':
-        return <Auth mode="signup" onNavigate={(view) => setCurrentView(view)} />;
+        return (
+          <Auth 
+            mode="signup" 
+            onNavigate={(view) => setCurrentView(view)} 
+            onLogin={(email) => setSessionEmail(email)}
+          />
+        );
       case 'privacy':
         return <PrivacyTerms mode="privacy" onBack={() => setCurrentView('landing')} />;
       case 'terms':

@@ -24,28 +24,30 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
     current_odometer: 0,
   });
 
-  const handleEdit = (v: Vehicle) => {
+  const handleEdit = (e: React.MouseEvent, v: Vehicle) => {
+    e.stopPropagation();
     setFormData(v);
     setEditingId(v.id);
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this vehicle? All linked fuel logs will be permanently removed.')) return;
     
     setLoading(true);
     try {
-      // 1. Manually cascade delete logs first (frontend enforcement)
+      // 1. Manually cascade delete logs first
       const { error: logError } = await supabase.from('fuel_entries').delete().eq('vehicle_id', id);
-      if (logError) throw logError;
+      if (logError) throw new Error('Failed to delete associated logs: ' + logError.message);
 
       // 2. Delete vehicle
       const { error: vehicleError } = await supabase.from('vehicles').delete().eq('id', id);
-      if (vehicleError) throw vehicleError;
+      if (vehicleError) throw new Error('Failed to delete vehicle: ' + vehicleError.message);
 
       refreshData();
     } catch (err: any) {
-      alert('Error deleting vehicle: ' + err.message);
+      alert('Delete failed: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -118,16 +120,24 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {vehicles.map((v) => (
-          <div key={v.id} className="glow-panel p-6 relative group card-hover icon-halo-anim">
+          <div key={v.id} className="glow-panel p-6 relative group card-hover icon-halo-anim cursor-default">
             <div className="flex justify-between items-start mb-4">
                <div className="p-3 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl icon-halo">
                  <Car className="text-brand-orange dark:text-neural-cyan" size={24} />
                </div>
                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                 <button onClick={() => handleEdit(v)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400 btn-press">
+                 <button 
+                   type="button"
+                   onClick={(e) => handleEdit(e, v)} 
+                   className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400 btn-press"
+                 >
                    <Edit2 size={16} />
                  </button>
-                 <button onClick={() => handleDelete(v.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 btn-press">
+                 <button 
+                   type="button"
+                   onClick={(e) => handleDelete(e, v.id)} 
+                   className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 btn-press"
+                 >
                    <Trash2 size={16} />
                  </button>
                </div>
