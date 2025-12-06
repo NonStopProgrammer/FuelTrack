@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Vehicle } from '../types';
 import { supabase } from '../lib/supabase';
-import { Car, Plus, Trash2, Edit2, X, Check } from 'lucide-react';
+import { Car, Plus, Trash2, Edit2, X, AlertTriangle } from 'lucide-react';
 
 interface VehicleManagerProps {
   vehicles: Vehicle[];
@@ -13,6 +13,10 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Delete Confirmation State
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<Partial<Vehicle>>({
     name: '',
     type: 'car',
@@ -31,21 +35,44 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
     setShowModal(true);
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const confirmDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this vehicle? All linked fuel logs will be permanently removed.')) return;
-    
+    setDeleteId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteId) return;
     setLoading(true);
     try {
-      // 1. Manually cascade delete logs first
-      const { error: logError } = await supabase.from('fuel_entries').delete().eq('vehicle_id', id);
+      // Verify current user
+      const { data: userRow, error: userErr } = await supabase
+        .from('app_users')
+        .select('id')
+        .eq('email', userEmail)
+        .single();
+
+      if (userErr || !userRow) throw new Error('Unable to verify user session');
+
+      // 1) Delete logs
+      const { error: logError } = await supabase
+        .from('fuel_entries')
+        .delete()
+        .eq('vehicle_id', deleteId)
+        .eq('owner_id', userRow.id);
+
       if (logError) throw new Error('Failed to delete associated logs: ' + logError.message);
 
-      // 2. Delete vehicle
-      const { error: vehicleError } = await supabase.from('vehicles').delete().eq('id', id);
+      // 2) Delete vehicle
+      const { error: vehicleError } = await supabase
+        .from('vehicles')
+        .delete()
+        .eq('id', deleteId)
+        .eq('owner_id', userRow.id);
+
       if (vehicleError) throw new Error('Failed to delete vehicle: ' + vehicleError.message);
 
       refreshData();
+      setDeleteId(null);
     } catch (err: any) {
       alert('Delete failed: ' + err.message);
     } finally {
@@ -57,7 +84,6 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
     e.preventDefault();
     setLoading(true);
 
-    // Get current user ID
     const { data: userData } = await supabase.from('app_users').select('id').eq('email', userEmail).single();
     
     if (!userData) {
@@ -95,11 +121,9 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
       }
       setShowModal(false);
       refreshData();
-      // Reset form
       setFormData({ name: '', type: 'car', make: '', model: '', year: new Date().getFullYear(), fuel_type: 'petrol', tank_capacity_l: 40, current_odometer: 0 });
       setEditingId(null);
     } catch (error: any) {
-      console.error(error);
       alert('Error saving vehicle: ' + error.message);
     } finally {
       setLoading(false);
@@ -135,7 +159,7 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
                  </button>
                  <button 
                    type="button"
-                   onClick={(e) => handleDelete(e, v.id)} 
+                   onClick={(e) => confirmDelete(e, v.id)} 
                    className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 btn-press"
                  >
                    <Trash2 size={16} />
@@ -166,7 +190,38 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
         )}
       </div>
 
-      {/* Modal */}
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+           <div className="absolute inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm" onClick={() => setDeleteId(null)}></div>
+           <div className="relative w-full max-w-sm bg-white dark:bg-[#1a1a1a] rounded-2xl p-6 shadow-2xl border border-red-100 dark:border-red-900/30 modal-enter text-center">
+              <div className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-500 mb-4">
+                <AlertTriangle size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Delete Vehicle?</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                This action cannot be undone. All fuel logs associated with this vehicle will be permanently deleted.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setDeleteId(null)} 
+                  className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={executeDelete} 
+                  disabled={loading}
+                  className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-bold shadow-lg hover:bg-red-600 transition-colors"
+                >
+                  {loading ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
            <div className="absolute inset-0 bg-black/30 dark:bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
@@ -179,6 +234,7 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ vehicles, refres
              </div>
 
              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Form fields same as before... */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div className="space-y-2">
                      <label className="text-xs font-bold uppercase text-gray-500">Nickname</label>

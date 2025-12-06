@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase, hashPassword } from '../lib/supabase';
-import { User, Phone, Building2, Save, Sun, Moon, Database, Trash2, Lock, AlertTriangle } from 'lucide-react';
+import { User, Phone, Building2, Save, Sun, Moon, Database, Trash2, Lock, AlertTriangle, X } from 'lucide-react';
 
 interface SettingsProps {
   user: any;
@@ -26,6 +26,10 @@ export const Settings: React.FC<SettingsProps> = ({ user, refreshProfile, isDark
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  
+  // Custom Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteInput, setDeleteInput] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,9 +92,6 @@ export const Settings: React.FC<SettingsProps> = ({ user, refreshProfile, isDark
   const handleExportData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch user logs joined with vehicle info (simulated join or simple fetch)
-      // Since supabase-js simple client join syntax is specific, we'll fetch logs and map vehicle names if needed, 
-      // or just fetch raw logs.
       const { data: logs, error } = await supabase
         .from('fuel_entries')
         .select('*')
@@ -105,7 +106,6 @@ export const Settings: React.FC<SettingsProps> = ({ user, refreshProfile, isDark
         return;
       }
 
-      // 2. Convert to CSV
       const headers = ['ID', 'Date', 'Vehicle ID', 'Odometer', 'Litres', 'Price/L', 'Total Cost', 'Station', 'Fill Type', 'Created At'];
       const rows = logs.map((l: any) => [
         l.id,
@@ -139,41 +139,56 @@ export const Settings: React.FC<SettingsProps> = ({ user, refreshProfile, isDark
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm("CRITICAL WARNING: This will permanently delete your account, all vehicles, and all fuel logs. This action cannot be undone. Type 'DELETE' to confirm.")) {
-       return;
-    }
-    
-    const confirmation = prompt("Type 'DELETE' to confirm account deletion:");
-    if (confirmation !== 'DELETE') return;
+    if (deleteInput !== 'DELETE') return;
 
     setLoading(true);
     try {
-      // 1. Get all vehicle IDs for this user to ensure we clean up logs even if owner_id is missing on logs
-      const { data: userVehicles } = await supabase.from('vehicles').select('id').eq('owner_id', user.id);
-      
+      // 1) Get this user's vehicle IDs (scoped)
+      const { data: userVehicles, error: vehFetchErr } = await supabase
+        .from('vehicles')
+        .select('id')
+        .eq('owner_id', user.id);
+
+      if (vehFetchErr) throw vehFetchErr;
+
       const vehicleIds = userVehicles?.map(v => v.id) || [];
 
+      // 2) Delete this user's logs for those vehicles (strict scope by owner_id as well)
       if (vehicleIds.length > 0) {
-        // Delete logs linked to these vehicles
-        const { error: logError } = await supabase.from('fuel_entries').delete().in('vehicle_id', vehicleIds);
+        const { error: logError } = await supabase
+          .from('fuel_entries')
+          .delete()
+          .in('vehicle_id', vehicleIds)
+          .eq('owner_id', user.id);
         if (logError) throw logError;
       }
-      
-      // Fallback: Delete any leftover logs by owner_id
-      await supabase.from('fuel_entries').delete().eq('owner_id', user.id);
-      
-      // 2. Delete vehicles
-      const { error: vehError } = await supabase.from('vehicles').delete().eq('owner_id', user.id);
+
+      // 3) Fallback: delete any remaining logs by owner scope
+      const { error: leftoverErr } = await supabase
+        .from('fuel_entries')
+        .delete()
+        .eq('owner_id', user.id);
+      if (leftoverErr) throw leftoverErr;
+
+      // 4) Delete vehicles for this user
+      const { error: vehError } = await supabase
+        .from('vehicles')
+        .delete()
+        .eq('owner_id', user.id);
       if (vehError) throw vehError;
-      
-      // 3. Delete user
-      const { error: userError } = await supabase.from('app_users').delete().eq('id', user.id);
+
+      // 5) Delete the user record
+      const { error: userError } = await supabase
+        .from('app_users')
+        .delete()
+        .eq('id', user.id);
       if (userError) throw userError;
-      
+
       alert('Account deleted successfully.');
       onLogout();
     } catch (err: any) {
       alert('Error deleting account: ' + err.message);
+      setShowDeleteModal(false);
     } finally {
       setLoading(false);
     }
@@ -329,15 +344,58 @@ export const Settings: React.FC<SettingsProps> = ({ user, refreshProfile, isDark
                   </div>
                </div>
                <button 
-                 onClick={handleDeleteAccount}
-                 disabled={loading}
+                 onClick={() => { setDeleteInput(''); setShowDeleteModal(true); }}
                  className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
                >
-                 {loading ? 'Deleting...' : 'Delete Forever'}
+                 Delete Forever
                </button>
             </div>
          </div>
       </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+           <div className="absolute inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-md" onClick={() => setShowDeleteModal(false)}></div>
+           <div className="relative w-full max-w-md bg-white dark:bg-[#1a1a1a] rounded-2xl p-8 shadow-2xl border-2 border-red-100 dark:border-red-900/50 modal-enter text-center">
+              <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-500 mb-6 animate-bounce-soft">
+                <AlertTriangle size={32} />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-serif dark:font-mono">Danger Zone</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                This will permanently delete your account, all vehicles, and all fuel logs. <br/>
+                <span className="font-bold text-red-500">This action cannot be undone.</span>
+              </p>
+              
+              <div className="mb-6">
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Type "DELETE" to confirm</label>
+                <input 
+                  type="text" 
+                  value={deleteInput}
+                  onChange={(e) => setDeleteInput(e.target.value)}
+                  className="w-full p-3 text-center bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-red-500 outline-none font-mono font-bold text-gray-900 dark:text-white"
+                  placeholder="DELETE"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowDeleteModal(false)} 
+                  className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDeleteAccount} 
+                  disabled={deleteInput !== 'DELETE' || loading}
+                  className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Processing...' : 'Delete Account'}
+                </button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 };

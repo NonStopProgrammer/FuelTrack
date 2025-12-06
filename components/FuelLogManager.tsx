@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FuelLog, Vehicle } from '../types';
 import { supabase } from '../lib/supabase';
-import { Plus, Calendar, Gauge, Fuel, DollarSign, MapPin, X, IndianRupee, Download, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Calendar, Gauge, Fuel, DollarSign, MapPin, X, IndianRupee, Download, Trash2, Edit2, AlertTriangle } from 'lucide-react';
 
 interface FuelLogManagerProps {
   logs: FuelLog[];
@@ -14,6 +14,9 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // Delete Confirmation State
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   
   // Log Form State
   const initialFormState = {
@@ -55,14 +58,39 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
     setShowModal(true);
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const confirmDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this entry? This will affect your stats.')) return;
+    setDeleteId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteId) return;
     setLoading(true);
-    const { error } = await supabase.from('fuel_entries').delete().eq('id', id);
-    if (error) alert('Error: ' + error.message);
-    else refreshData();
-    setLoading(false);
+    try {
+      // Verify user
+      const { data: userRow, error: userErr } = await supabase
+        .from('app_users')
+        .select('id')
+        .eq('email', userEmail)
+        .single();
+
+      if (userErr || !userRow) throw new Error('Unable to verify user session');
+
+      const { error } = await supabase
+        .from('fuel_entries')
+        .delete()
+        .eq('id', deleteId)
+        .eq('owner_id', userRow.id);
+
+      if (error) throw error;
+
+      refreshData();
+      setDeleteId(null);
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +135,7 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
         
         if (error) throw error;
 
-        // Auto-update odometer logic only on new inserts for simplicity
+        // Auto-update odometer logic only on new inserts
         const vehicle = vehicles.find(v => v.id === formData.vehicle_id);
         if (vehicle && formData.odometer > vehicle.current_odometer) {
           await supabase.from('vehicles').update({ current_odometer: formData.odometer }).eq('id', formData.vehicle_id);
@@ -207,7 +235,7 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
                       </button>
                       <button 
                         type="button"
-                        onClick={(e) => handleDelete(e, log.id)} 
+                        onClick={(e) => confirmDelete(e, log.id)} 
                         className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-500 btn-press"
                       >
                         <Trash2 size={14} />
@@ -226,9 +254,40 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
         </div>
       </div>
 
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+           <div className="absolute inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm" onClick={() => setDeleteId(null)}></div>
+           <div className="relative w-full max-w-sm bg-white dark:bg-[#1a1a1a] rounded-2xl p-6 shadow-2xl border border-red-100 dark:border-red-900/30 modal-enter text-center">
+              <div className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-500 mb-4">
+                <AlertTriangle size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Delete Log Entry?</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                This will permanently remove this fuel record from your analytics.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setDeleteId(null)} 
+                  className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={executeDelete} 
+                  disabled={loading}
+                  className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-bold shadow-lg hover:bg-red-600 transition-colors"
+                >
+                  {loading ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+           </div>
+        </div>
+      )}
+
       {/* Add/Edit Log Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-[15vh]">
           <div className="absolute inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm transition-opacity" onClick={() => setShowModal(false)}></div>
           
           <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl p-8 border border-gray-100 dark:border-glass-border modal-enter max-h-[85vh] overflow-y-auto flex flex-col">
@@ -240,7 +299,7 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-               {/* Vehicle Select */}
+               {/* Same form fields as before... */}
                <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Vehicle</label>
                   <select 
@@ -256,7 +315,6 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
                  <div>
                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Date</label>
                    <div className="relative">
-                      {/* Using native date input which triggers calendar on modern browsers */}
                       <input 
                         required 
                         type="date" 
@@ -309,7 +367,6 @@ export const FuelLogManager: React.FC<FuelLogManagerProps> = ({ logs, vehicles, 
                    </div>
                </div>
                
-               {/* Added Fill Type Select */}
                <div>
                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Fill Type</label>
                    <select 
